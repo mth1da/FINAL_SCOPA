@@ -1,6 +1,7 @@
 package fr.pantheonsorbonne.miage;
 
 import fr.pantheonsorbonne.miage.exception.NoMoreCardException;
+import fr.pantheonsorbonne.miage.exception.NoSuchPlayerException;
 import fr.pantheonsorbonne.miage.game.Card;
 
 import java.util.*;
@@ -13,8 +14,12 @@ public class LocalScopa extends ScopaEngine {
     private final Set<String> initialPlayers;
     private final Map<String, Queue<Card>> playerCards = new HashMap<>();
 
-    protected Queue<Card> getPlayerCards(String playerName){
-        return playerCards.get(playerName);
+    protected Queue<Card> getPlayerCards(String playerName) throws NoSuchPlayerException{
+        Queue<Card> playerCard;
+        playerCard=playerCards.get(playerName);
+        if (playerCard==null)
+            throw new NoSuchPlayerException(playerName);
+        return playerCard;
     }
     
     protected Map<String, Queue<Card>> allPlayerCards(){
@@ -36,7 +41,14 @@ public class LocalScopa extends ScopaEngine {
 
     public static void main(String... args) {
         LocalScopa localScopa = new LocalScopa(Set.of("Joueur1", "Joueur2", "Joueur3", "Joueur4"));
-        localScopa.play();
+        try{
+            
+            localScopa.play();
+        }
+        catch (Throwable e){
+            System.out.println(e);
+        }
+        
 
     }
 
@@ -93,4 +105,3 @@ public class LocalScopa extends ScopaEngine {
 
 
 }
-
