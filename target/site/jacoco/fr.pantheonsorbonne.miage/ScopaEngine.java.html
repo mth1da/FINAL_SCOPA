@@ -1,0 +1,599 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScopaEngine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">l3-poo-war</a> &gt; <a href="index.source.html" class="el_package">fr.pantheonsorbonne.miage</a> &gt; <span class="el_source">ScopaEngine.java</span></div><h1>ScopaEngine.java</h1><pre class="source lang-java linenums">package fr.pantheonsorbonne.miage;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+
+import fr.pantheonsorbonne.miage.exception.NoMoreCardException;
+import fr.pantheonsorbonne.miage.game.Card;
+import fr.pantheonsorbonne.miage.game.Deck;
+import fr.pantheonsorbonne.miage.enums.CardValue;
+
+/**
+ * this class is a abstract version of the engine, to be used locally on through
+ * the network
+ */
+<span class="fc" id="L22">public abstract class ScopaEngine {</span>
+
+	public static final int CARDS_IN_HAND_INITIAL_COUNT = 3;
+	private static final String DENIER = &quot;DIAMOND&quot;;
+
+<span class="fc" id="L27">	Map&lt;String, Queue&lt;Card&gt;&gt; playerCollectedCards = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L28">	Map&lt;String, Integer&gt; playerCollectedScopa = new HashMap&lt;&gt;();</span>
+	protected abstract Map&lt;String, Queue&lt;Card&gt;&gt; allPlayerCards();
+	
+
+	/**
+	 * play a scopa with the provided players
+	 */
+	public void play() {
+
+		// send the initial hand to every players
+<span class="nc" id="L38">		giveInitialHandToPLayers();</span>
+
+		// set the initial collected cards and scopa of each players
+<span class="nc" id="L41">		initCollectedAndScopaCards();</span>
+
+		// set the initial round deck and make sure there aren't 3 or more cards of the same value
+<span class="nc" id="L44">		Queue&lt;Card&gt; roundDeck = new LinkedList&lt;&gt;();</span>
+		do {
+<span class="nc" id="L46">			roundDeck.addAll(getInitialRoundDeck());</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">		} while (checkOverThreeSameCardValue(roundDeck));</span>
+
+		// make a queue with all the players
+<span class="nc" id="L50">		final Queue&lt;String&gt; players = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L51">		players.addAll(this.getInitialPlayers());</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">		for (int i = 0; i &lt; players.size(); i++) {</span>
+<span class="nc" id="L53">			players.offer(players.poll());</span>
+		}
+
+		// repeat until there are no more cards in deck and until the players don't have any cards left to play
+<span class="nc bnc" id="L57" title="All 4 branches missed.">		while (Deck.deckSize &gt; 1 || !noCardsWithPlayers()) {</span>
+
+			//a supp
+			//printCardStat(roundDeck);
+
+			// take the first player form the queue
+<span class="nc" id="L63">			String currentPlayer = players.poll();</span>
+
+			//display each card of all players and of the deck
+<span class="nc" id="L66">			displayPlayerRoundDeckCards(currentPlayer, roundDeck);</span>
+
+			// and put it immediately at the end
+<span class="nc" id="L69">			players.offer(currentPlayer);</span>
+
+
+<span class="nc bnc" id="L72" title="All 2 branches missed.">			if (!getPlayerCards(currentPlayer).isEmpty()) {</span>
+<span class="nc" id="L73">				ArrayList&lt;Card&gt; pairCards = makePair(getPlayerCards(currentPlayer), roundDeck);</span>
+				//if a pair is possible, 
+<span class="nc bnc" id="L75" title="All 2 branches missed.">				if (!pairCards.isEmpty()) {</span>
+					//processing the pair
+<span class="nc" id="L77">					processPairCards(currentPlayer, pairCards, roundDeck);</span>
+					//processing the scopa point if done
+<span class="nc" id="L79">					processScopaPoint(currentPlayer, roundDeck);</span>
+				} else {
+					try {
+						// apply avoid to put 7D strategy
+<span class="nc" id="L83">						Card selectedCard = getCardFromPlayer(currentPlayer);</span>
+						// put the card in the round deck
+<span class="nc" id="L85">						roundDeck.offer(selectedCard);</span>
+<span class="nc" id="L86">					} catch (NoMoreCardException e) {</span>
+<span class="nc" id="L87">						System.out.println(&quot;no more cards&quot;);</span>
+<span class="nc" id="L88">					}</span>
+				}
+<span class="nc" id="L90">			} else {</span>
+				
+<span class="nc" id="L92">				Card[] cards = Deck.getRandomCards(CARDS_IN_HAND_INITIAL_COUNT);</span>
+<span class="nc" id="L93">				String hand = Card.cardsToString(cards); </span>
+<span class="nc" id="L94">				giveCardsToPlayer(currentPlayer, hand);</span>
+			}
+<span class="nc" id="L96">			System.out.println(&quot;\n&quot;);</span>
+
+<span class="nc" id="L98">		}</span>
+		//A SUPPRIMER
+		//printCardStat(roundDeck);
+
+		//since we've left the loop, the game is over
+		//we give the remaning cards to the last player having played
+<span class="nc" id="L104">		addRemainingCardsToCollected(roundDeck, players);</span>
+		
+		//displaying the collected cards of each player
+<span class="nc" id="L107">		displayPlayerCollectedCards(players);</span>
+		
+		/*A SUPPRIMER
+		int count=0;
+		for (String currentPlayer : getInitialPlayers()){
+			count=count+ playerCollectedCards.get(currentPlayer).size();
+		}
+		System.out.println(&quot;nb cartes : &quot; +count);
+		*/
+		
+		//making sure the round deck is empty
+		/*A SUPPRIMER 
+		System.out.print(&quot;RoundDeck: &quot;);
+		roundDeck.stream().forEach(c -&gt; System.out.print(c.toFancyString()));
+		System.out.println();
+		*/
+		
+		//get the winner
+<span class="nc" id="L125">		String winner = getWinner(playerCollectedCards);</span>
+
+		// send the winner the gameover and leave
+<span class="nc" id="L128">		declareWinner(winner);</span>
+<span class="nc" id="L129">		System.exit(0);</span>
+<span class="nc" id="L130">	}</span>
+	
+	protected void giveInitialHandToPLayers() {
+<span class="nc bnc" id="L133" title="All 2 branches missed.">		for (String playerName : getInitialPlayers()) {</span>
+			// get random cards
+<span class="nc" id="L135">			Card[] cards = Deck.getRandomCards(CARDS_IN_HAND_INITIAL_COUNT);</span>
+			// transform them to String
+<span class="nc" id="L137">			String hand = Card.cardsToString(cards); // changer ça si on utilise pas le string</span>
+			// send them to this players
+<span class="nc" id="L139">			giveCardsToPlayer(playerName, hand);</span>
+
+<span class="nc" id="L141">		}</span>
+<span class="nc" id="L142">	}</span>
+	
+	protected  void initCollectedAndScopaCards() {
+<span class="fc bfc" id="L145" title="All 2 branches covered.">		for (String playerName : getInitialPlayers()) {</span>
+<span class="fc" id="L146">			playerCollectedCards.put(playerName, new LinkedList&lt;&gt;());</span>
+<span class="fc" id="L147">			playerCollectedScopa.put(playerName, 0);</span>
+<span class="fc" id="L148">		}	</span>
+<span class="fc" id="L149">	}</span>
+
+	protected List&lt;Card&gt; getInitialRoundDeck() {
+<span class="nc" id="L152">		return Arrays.asList(Deck.getRandomCards(4));</span>
+	}
+
+	/**
+	 * informs if there are three or more cards of the same value on the table
+	 *
+	 * @return true if so, false if not
+	 */
+	public boolean checkOverThreeSameCardValue(Queue&lt;Card&gt; queue) {
+<span class="fc" id="L161">		HashMap&lt;CardValue, Integer&gt; map = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">		for (Card card : queue) {</span>
+<span class="fc" id="L163">			CardValue value = card.getValue();</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">			if (map.containsKey(value)) {</span>
+<span class="fc" id="L165">				map.put(value, map.get(value) + 1);</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">				if (map.get(value) &gt;= 3) {</span>
+<span class="fc" id="L167">					return true;</span>
+				}
+			} else {
+<span class="fc" id="L170">				map.put(value, 1);</span>
+			}
+<span class="fc" id="L172">		}</span>
+<span class="fc" id="L173">		return false;</span>
+	}
+
+	private boolean noCardsWithPlayers() {
+<span class="nc" id="L177">		int count=0;</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">		for(String player:getInitialPlayers()) {</span>
+<span class="nc" id="L179">			count=count+getPlayerCards(player).size();</span>
+<span class="nc" id="L180">		}	</span>
+<span class="nc bnc" id="L181" title="All 2 branches missed.">		return count==0;</span>
+	}
+
+	//A SUPPRIMER
+	protected void printCardStat(Queue&lt;Card&gt; roundDeck) {
+<span class="nc" id="L186">		int count=roundDeck.size()+Deck.deckSize;</span>
+<span class="nc" id="L187">		System.out.println(&quot;roundDeck: &quot;+roundDeck.size());</span>
+<span class="nc" id="L188">		System.out.println(&quot;Deck: &quot;+Deck.deckSize);</span>
+<span class="nc bnc" id="L189" title="All 2 branches missed.">		for(String player:getInitialPlayers()) {</span>
+<span class="nc" id="L190">			count=count+getPlayerCards(player).size()+playerCollectedCards.get(player).size();</span>
+<span class="nc" id="L191">			System.out.println(&quot;Player &quot;+player+&quot;: &quot;+getPlayerCards(player).size());</span>
+<span class="nc" id="L192">			System.out.println(&quot;Player Collected &quot;+player+&quot;: &quot;+playerCollectedCards.get(player).size());</span>
+<span class="nc" id="L193">		}</span>
+		
+<span class="nc" id="L195">		System.out.println(&quot;*********************\n&quot;+count+&quot;*********************\n&quot;);</span>
+		
+<span class="nc" id="L197">	}</span>
+
+	/*
+	 * displays the player's cards and the round deck 's cards in a fancy way
+	 */
+	protected void displayPlayerRoundDeckCards(String currentPlayer, Queue&lt;Card&gt; roundDeck) {
+<span class="nc" id="L203">		System.out.print(&quot;player &quot; + currentPlayer + &quot;: &quot;);</span>
+<span class="nc" id="L204">		getPlayerCards(currentPlayer).stream().forEach(c -&gt; System.out.print(c.toFancyString()));</span>
+<span class="nc" id="L205">		System.out.println();</span>
+<span class="nc" id="L206">		System.out.print(&quot;RoundDeck: &quot;);</span>
+<span class="nc" id="L207">		roundDeck.stream().forEach(c -&gt; System.out.print(c.toFancyString()));</span>
+<span class="nc" id="L208">		System.out.println();</span>
+<span class="nc" id="L209">	}</span>
+
+	/**
+	 * get all cards of a player
+	 * 
+	 * @param playerName
+	 * @return all cards of a player
+	 */
+	protected abstract Queue&lt;Card&gt; getPlayerCards(String playerName);
+
+	/*
+	 * making a pair
+	 */
+	protected ArrayList&lt;Card&gt; makePair(Queue&lt;Card&gt; playerCards, Queue&lt;Card&gt; roundDeck) {
+
+		// applying 7D strategy
+<span class="pc bpc" id="L225" title="1 of 2 branches missed.">		if (!settebelloInDeckStrategy(playerCards, roundDeck).isEmpty()) {</span>
+<span class="nc" id="L226">			System.out.println(&quot;took the settebello !&quot;);</span>
+<span class="nc" id="L227">			return settebelloInDeckStrategy(playerCards, roundDeck);</span>
+<span class="pc bpc" id="L228" title="1 of 2 branches missed.">		} else if (!settebelloInHandStrategy(playerCards, roundDeck).isEmpty()) {</span>
+<span class="nc" id="L229">			System.out.println(&quot;took the settebello !&quot;);</span>
+<span class="nc" id="L230">			return settebelloInHandStrategy(playerCards, roundDeck);</span>
+		}
+
+		// applying denier strategy
+<span class="pc bpc" id="L234" title="1 of 2 branches missed.">		else if (!denierCardInDeckStrategy(playerCards, roundDeck).isEmpty()) {</span>
+<span class="nc" id="L235">			return denierCardInDeckStrategy(playerCards, roundDeck);</span>
+<span class="pc bpc" id="L236" title="1 of 2 branches missed.">		} else if (!denierCardInHandStrategy(playerCards, roundDeck).isEmpty()) {</span>
+<span class="nc" id="L237">			return denierCardInHandStrategy(playerCards, roundDeck);</span>
+		}
+
+		// applying no specific strategy
+		else {
+<span class="fc" id="L242">			return noStrategy(playerCards, roundDeck);</span>
+		}
+
+	}
+
+	/*
+	 * applying 7D strategy : if there's a settebello in the round deck
+	 * and if the player have a card value of 7
+	 * the player will make a pair with its 7 to take the settebello
+	 */
+	protected ArrayList&lt;Card&gt; settebelloInDeckStrategy(Queue&lt;Card&gt; playerCards, Queue&lt;Card&gt; roundDeck) {
+<span class="fc" id="L253">		ArrayList&lt;Card&gt; playerCardDeckCard = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L254" title="All 2 branches covered.">		for (Card card : roundDeck) {</span>
+<span class="fc bfc" id="L255" title="All 2 branches covered.">			if (card.toString().equals(&quot;7D&quot;)) {</span>
+<span class="fc bfc" id="L256" title="All 2 branches covered.">				for (Card playerCard : playerCards) {</span>
+<span class="fc bfc" id="L257" title="All 2 branches covered.">					if (playerCard.getValue().getStringRepresentation().equals(&quot;7&quot;)) {</span>
+<span class="fc" id="L258">						playerCardDeckCard.add(playerCard);</span>
+<span class="fc" id="L259">						playerCardDeckCard.add(card);</span>
+<span class="fc" id="L260">						return playerCardDeckCard; </span>
+					}
+<span class="fc" id="L262">				}</span>
+			}
+<span class="fc" id="L264">		}</span>
+<span class="fc" id="L265">		return playerCardDeckCard;</span>
+	}
+
+	/*
+	 * applying 7D strategy : if the player has a settebello in his hand
+	 * and if there is a card value of 7 in the deck
+	 * the player will make a pair with its settebello to take the 7
+	 * by doing such, the player secures the settebello to its collected cards
+	 */
+	protected ArrayList&lt;Card&gt; settebelloInHandStrategy(Queue&lt;Card&gt; playerCards, Queue&lt;Card&gt; roundDeck) {
+<span class="fc" id="L275">		ArrayList&lt;Card&gt; playerCardDeckCard = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L276" title="All 2 branches covered.">		for (Card playerCard : playerCards) {</span>
+<span class="fc bfc" id="L277" title="All 2 branches covered.">			if (playerCard.toString().equals(&quot;7D&quot;)) {</span>
+<span class="pc bpc" id="L278" title="1 of 2 branches missed.">				for (Card card : roundDeck) {</span>
+<span class="fc bfc" id="L279" title="All 2 branches covered.">					if (card.getValue().getStringRepresentation().equals(&quot;7&quot;)) {</span>
+<span class="fc" id="L280">						playerCardDeckCard.add(playerCard);</span>
+<span class="fc" id="L281">						playerCardDeckCard.add(card);</span>
+<span class="fc" id="L282">						return playerCardDeckCard;</span>
+					}
+<span class="fc" id="L284">				}</span>
+			}
+<span class="fc" id="L286">		}</span>
+<span class="fc" id="L287">		return playerCardDeckCard;</span>
+	}
+
+	/*
+	 * applying denier strategy : if there's a card of denier in the round deck
+	 * and if the player have a card which matches the value of the card of denier
+	 * the player will make a pair with this card to take the denier card
+	 */
+	protected ArrayList&lt;Card&gt; denierCardInDeckStrategy(Queue&lt;Card&gt; playerCards, Queue&lt;Card&gt; roundDeck) {
+<span class="fc" id="L296">		ArrayList&lt;Card&gt; playerCardDeckCard = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L297" title="All 2 branches covered.">		for (Card card : roundDeck) {</span>
+<span class="fc bfc" id="L298" title="All 2 branches covered.">			if (card.getColor().name().equals(DENIER)) {</span>
+<span class="fc bfc" id="L299" title="All 2 branches covered.">				for (Card playerCard : playerCards) {</span>
+<span class="fc bfc" id="L300" title="All 2 branches covered.">					if (playerCard.getValue().getStringRepresentation().equals(card.getValue().getStringRepresentation())) {</span>
+<span class="fc" id="L301">						playerCardDeckCard.add(playerCard);</span>
+<span class="fc" id="L302">						playerCardDeckCard.add(card);</span>
+<span class="fc" id="L303">						return playerCardDeckCard;</span>
+					}
+<span class="fc" id="L305">				}</span>
+			}
+<span class="fc" id="L307">		}</span>
+<span class="fc" id="L308">		return playerCardDeckCard;</span>
+	}
+
+	/*
+	 * applying denier strategy : if the player has a card of denier in his hand
+	 * and if there is a card which matches the value of the player's card of denier
+	 * in the deck
+	 * the player will make a pair with this card to secure its denier card
+	 */
+	protected ArrayList&lt;Card&gt; denierCardInHandStrategy(Queue&lt;Card&gt; playerCards, Queue&lt;Card&gt; roundDeck) {
+<span class="fc" id="L318">		ArrayList&lt;Card&gt; playerCardDeckCard = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L319" title="All 2 branches covered.">		for (Card playerCard : playerCards) {</span>
+<span class="fc bfc" id="L320" title="All 2 branches covered.">			if (playerCard.getColor().name().equals(DENIER)) {</span>
+<span class="fc bfc" id="L321" title="All 2 branches covered.">				for (Card card : roundDeck) {</span>
+<span class="fc bfc" id="L322" title="All 2 branches covered.">					if (card.getValue().getStringRepresentation().equals(playerCard.getValue().getStringRepresentation())) {</span>
+<span class="fc" id="L323">						playerCardDeckCard.add(playerCard);</span>
+<span class="fc" id="L324">						playerCardDeckCard.add(card);</span>
+<span class="fc" id="L325">						return playerCardDeckCard;</span>
+					}
+<span class="fc" id="L327">				}</span>
+			}
+<span class="fc" id="L329">		}</span>
+<span class="fc" id="L330">		return playerCardDeckCard;</span>
+	}
+
+	/*
+	 * applying no strategy : if there's no settebello nor a denier card in
+	 * the round deck
+	 * the player will make a pair with the first card value in the round deck
+	 */
+	protected ArrayList&lt;Card&gt; noStrategy(Queue&lt;Card&gt; playerCards, Queue&lt;Card&gt; roundDeck) {
+<span class="fc" id="L339">		ArrayList&lt;Card&gt; playerCardDeckCard = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L340" title="All 2 branches covered.">		for (Card playerCard : playerCards) {</span>
+<span class="fc bfc" id="L341" title="All 2 branches covered.">			for (Card deckCard : roundDeck ){</span>
+<span class="fc bfc" id="L342" title="All 2 branches covered.">				if (deckCard.getValue().getStringRepresentation().equals(playerCard.getValue().getStringRepresentation())) {</span>
+<span class="fc" id="L343">					playerCardDeckCard.add(playerCard);</span>
+<span class="fc" id="L344">					playerCardDeckCard.add(deckCard);</span>
+<span class="fc" id="L345">					return playerCardDeckCard;</span>
+				}
+<span class="fc" id="L347">			}</span>
+<span class="fc" id="L348">		}</span>
+<span class="fc" id="L349">		return playerCardDeckCard;</span>
+	}
+
+	/*
+	 * processing the cards won by the player by adding them to its collected cards
+	 */
+	protected Map&lt;String, Queue&lt;Card&gt;&gt; processPairCards(String currentPlayer, ArrayList&lt;Card&gt; pairCards, Queue&lt;Card&gt; roundDeck){
+<span class="fc" id="L356">		Card selectedCard = pairCards.get(0);</span>
+<span class="fc" id="L357">		playerCollectedCards.get(currentPlayer).offer(selectedCard);</span>
+<span class="fc" id="L358">		getPlayerCards(currentPlayer).remove(selectedCard);</span>
+
+<span class="fc" id="L360">		Card removedCard = pairCards.get(1);</span>
+<span class="fc" id="L361">		playerCollectedCards.get(currentPlayer).offer(removedCard);</span>
+<span class="fc" id="L362">		roundDeck.remove(removedCard);</span>
+		
+<span class="fc" id="L364">		return playerCollectedCards;</span>
+	}
+
+	/*
+	 * determining if the player did a scopa and adding a point to its collected scopa
+	 */
+	protected Map&lt;String, Integer&gt; processScopaPoint(String currentPlayer, Queue&lt;Card&gt; roundDeck){
+<span class="fc bfc" id="L371" title="All 2 branches covered.">		if (roundDeck.isEmpty()) {</span>
+<span class="fc" id="L372">			int counter = playerCollectedScopa.get(currentPlayer) + 1;</span>
+<span class="fc" id="L373">			playerCollectedScopa.put(currentPlayer, counter);</span>
+<span class="fc" id="L374">			System.out.println(currentPlayer + &quot; made a scopa !&quot;);</span>
+		}
+<span class="fc" id="L376">		return playerCollectedScopa;</span>
+	}
+
+	/*
+	 * adding 
+	 */
+	protected Map&lt;String, Queue&lt;Card&gt;&gt; addRemainingCardsToCollected(Queue&lt;Card&gt; roundDeck,Queue&lt;String&gt; players){
+<span class="fc bfc" id="L383" title="All 2 branches covered.">		while (!roundDeck.isEmpty()) {</span>
+<span class="fc" id="L384">			String currentPlayer = players.poll();</span>
+<span class="fc" id="L385">			playerCollectedCards.get(currentPlayer).offer(roundDeck.poll());</span>
+<span class="fc" id="L386">			players.offer(currentPlayer);</span>
+<span class="fc" id="L387">		}</span>
+<span class="fc" id="L388">		return playerCollectedCards;</span>
+	}
+
+	/**
+	 * display the collected cards of each players
+	 * @param players
+	 */
+	protected void displayPlayerCollectedCards(Queue&lt;String&gt; players){
+<span class="nc" id="L396">		System.out.println(&quot;Collected Cards&quot;);</span>
+<span class="nc bnc" id="L397" title="All 2 branches missed.">		for (String currentPlayer : players) {</span>
+<span class="nc" id="L398">			System.out.print(&quot;player &quot; + currentPlayer + &quot;: &quot;);</span>
+<span class="nc" id="L399">			playerCollectedCards.get(currentPlayer).stream().forEach(c -&gt; System.out.print(c.toFancyString()));</span>
+<span class="nc" id="L400">			System.out.println();</span>
+<span class="nc" id="L401">		}</span>
+<span class="nc" id="L402">		System.out.println(&quot;\n&quot;);</span>
+<span class="nc" id="L403">	}</span>
+
+	/**
+	 * give the winner of the game
+	 * 
+	 * @param playerCollectedCards all cards collected by each player
+	 * @return the name of the winner or nobody if it's a tie
+	 */
+	protected String getWinner(Map&lt;String, Queue&lt;Card&gt;&gt; playerCollectedCards) {
+<span class="fc" id="L412">		int maxCount = 0;</span>
+<span class="fc" id="L413">		String winner = &quot;&quot;;</span>
+		//count the 
+<span class="fc" id="L415">		Map&lt;String, Integer&gt; playersScores = countPlayersScores(playerCollectedCards, playerCollectedScopa);</span>
+<span class="fc bfc" id="L416" title="All 2 branches covered.">		for (Map.Entry&lt;String, Integer&gt; player : playersScores.entrySet()) {</span>
+<span class="fc" id="L417">			System.out.println(player.getKey() + &quot; a &quot; + player.getValue() + &quot; points.&quot;);</span>
+<span class="fc bfc" id="L418" title="All 2 branches covered.">			if (player.getValue() &gt; maxCount) {</span>
+<span class="fc" id="L419">				maxCount = player.getValue();</span>
+<span class="fc" id="L420">				winner = player.getKey();</span>
+			}
+<span class="pc bpc" id="L422" title="1 of 2 branches missed.">			else if (player.getValue() == maxCount) {</span>
+<span class="fc" id="L423">				winner = &quot;nobody&quot;;</span>
+			}
+<span class="fc" id="L425">		}</span>
+<span class="fc" id="L426">		return winner;</span>
+	}
+
+	/**
+	 * gives the score of each player
+	 *
+	 * @param playerCollectedCards all cards collected by each player
+	 * @return playersScores a map of the players associated with their score
+	 */
+	protected Map&lt;String, Integer&gt; countPlayersScores(Map&lt;String, Queue&lt;Card&gt;&gt; playerCollectedCards, Map&lt;String, Integer&gt; playerCollectedScopa) {
+<span class="fc" id="L436">		Map&lt;String, Integer&gt; playersScores = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L437" title="All 2 branches covered.">		for (Map.Entry&lt;String, Queue&lt;Card&gt;&gt; player : playerCollectedCards.entrySet()) {</span>
+<span class="fc" id="L438">			int count = 0;</span>
+<span class="fc" id="L439">			ArrayList&lt;String&gt; bestCountPlayers = bestCount(playerCollectedCards);</span>
+<span class="fc bfc" id="L440" title="All 2 branches covered.">			for (String joueur : bestCountPlayers) {</span>
+<span class="fc bfc" id="L441" title="All 2 branches covered.">				if (player.getKey().equals(joueur)) {</span>
+<span class="fc" id="L442">					count++;</span>
+				}
+<span class="fc" id="L444">			}</span>
+<span class="fc" id="L445">			ArrayList&lt;String&gt; mostDenierCountPlayers = mostDenierCount(playerCollectedCards);</span>
+<span class="fc bfc" id="L446" title="All 2 branches covered.">			for (String joueur : mostDenierCountPlayers) {</span>
+<span class="fc bfc" id="L447" title="All 2 branches covered.">				if (player.getKey().equals(joueur)) {</span>
+<span class="fc" id="L448">					count++;</span>
+				}
+<span class="fc" id="L450">			}</span>
+<span class="fc bfc" id="L451" title="All 2 branches covered.">			if (player.getKey().equals(havingSettebello(playerCollectedCards))) {</span>
+<span class="fc" id="L452">				count++;</span>
+			}
+
+<span class="fc" id="L455">			playersScores.put(player.getKey(), count);</span>
+
+<span class="fc bfc" id="L457" title="All 2 branches covered.">			if(playerCollectedScopa.get(player.getKey()) != null){</span>
+<span class="fc" id="L458">				playersScores.put(player.getKey(), count + playerCollectedScopa.get(player.getKey()));</span>
+			}
+<span class="fc" id="L460">		}</span>
+
+<span class="fc" id="L462">		return playersScores;</span>
+	}
+
+	/**
+	 * gives the name[s] of the player[s] having the most pairs at the end of the game;
+	 *
+	 * @param playerCollectedCards a map of all cards collected by each player
+	 * @return bestPlayers a list of name[s] of the best player[s]
+	 */
+	ArrayList&lt;String&gt; bestCount(Map&lt;String, Queue&lt;Card&gt;&gt; playerCollectedCards) {
+		//determining the highest number of cards collected by a player
+<span class="fc" id="L473">		int maxcount = 0;</span>
+<span class="fc bfc" id="L474" title="All 2 branches covered.">		for (String player : playerCollectedCards.keySet()) {</span>
+<span class="fc bfc" id="L475" title="All 2 branches covered.">			if (playerCollectedCards.get(player).size() &gt; maxcount) {</span>
+<span class="fc" id="L476">				maxcount = playerCollectedCards.get(player).size();</span>
+			}
+<span class="fc" id="L478">		}</span>
+		//setting the best players[s] thanks to the maxcount
+<span class="fc" id="L480">		ArrayList&lt;String&gt; bestPlayers = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L481" title="All 2 branches covered.">		for (String player : playerCollectedCards.keySet()) {</span>
+<span class="fc bfc" id="L482" title="All 2 branches covered.">			if (playerCollectedCards.get(player).size() == maxcount) {</span>
+<span class="fc" id="L483">				bestPlayers.add(player);</span>
+			}
+<span class="fc" id="L485">		}</span>
+
+<span class="fc" id="L487">		return bestPlayers;</span>
+	}
+
+	/**
+	 * gives the name of the player having the most cards of deniers at the end of
+	 * the game; null if 2 players have the same count
+	 *
+	 * @param playerCollectedCards
+	 * @return the player having the most cards of deniers
+	 */
+	ArrayList&lt;String&gt; mostDenierCount(Map&lt;String, Queue&lt;Card&gt;&gt; playerCollectedCards) {
+<span class="fc" id="L498">		long maxcount = 0;</span>
+<span class="fc" id="L499">		ArrayList&lt;String&gt; bestPlayers = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L500" title="All 2 branches covered.">		for (String player : playerCollectedCards.keySet()) {</span>
+<span class="fc" id="L501">			long counter = playerCollectedCards.get(player).stream()</span>
+<span class="fc" id="L502">					.filter(card -&gt; card.getColor().name().equals(DENIER)).count();</span>
+<span class="fc bfc" id="L503" title="All 2 branches covered.">			if (counter &gt; maxcount) {</span>
+<span class="fc" id="L504">				maxcount = counter;</span>
+			}
+<span class="fc" id="L506">		}</span>
+<span class="fc bfc" id="L507" title="All 2 branches covered.">		for (String player : playerCollectedCards.keySet()) {</span>
+<span class="fc" id="L508">			if (playerCollectedCards.get(player).stream()</span>
+<span class="fc bfc" id="L509" title="All 2 branches covered.">					.filter(card -&gt; card.getColor().name().equals(DENIER)).count() == maxcount) {</span>
+<span class="fc" id="L510">				bestPlayers.add(player);</span>
+			}
+<span class="fc" id="L512">		}</span>
+<span class="fc" id="L513">		return bestPlayers;</span>
+	}
+
+	/**
+	 * gives the name of the player having settebello (7 of deniers) at the end of
+	 * the game
+	 *
+	 * @param playerCollectedCards
+	 * @return the player having the settebello
+	 */
+	String havingSettebello(Map&lt;String, Queue&lt;Card&gt;&gt; playerCollectedCards) {
+<span class="fc bfc" id="L524" title="All 2 branches covered.">		for (String player : playerCollectedCards.keySet()) {</span>
+<span class="fc bfc" id="L525" title="All 2 branches covered.">			if (playerCollectedCards.get(player).stream().filter(card -&gt; card.toString().equals(&quot;7D&quot;)).count() &gt; 0) {</span>
+<span class="fc" id="L526">				return player;</span>
+			}
+<span class="fc" id="L528">		}</span>
+<span class="fc" id="L529">		return null;</span>
+	}
+
+	/**
+	 * this method must be called when a winner is identified
+	 * send the winner the gameover
+	 *
+	 * @param winner the winner
+	 * 
+	 */
+	protected abstract void declareWinner(String winner);
+
+
+	/**
+	 * provide the list of the initial players to play the game
+	 *
+	 * @return
+	 */
+	protected abstract Set&lt;String&gt; getInitialPlayers();
+
+	/**
+	 * give some card to a player
+	 *
+	 * @param playerName the player that will receive the cards
+	 * @param hand       the cards as a string (to be converted later)
+	 */
+	protected abstract void giveCardsToPlayer(String playerName, String hand);
+
+	/**
+	 * get a card from a player. If the player doesn't have a card, it will be
+	 * declared loser and all the left over cards will be given to his opponent
+	 *
+	 * @param leftOverCard               card left over from another round
+	 * @param cardProviderPlayer         the player that should give a card
+	 * @param cardProviderPlayerOpponent the Opponent of this player
+	 * @return a card of null if player cardProviderPlayer is gameover
+	 */
+	protected abstract Card getCardOrGameOver(Collection&lt;Card&gt; leftOverCard, String cardProviderPlayer,
+			String cardProviderPlayerOpponent);
+
+	
+
+	// not used for now A SUPPRIMER
+	/*
+	protected void getCountPlayersScores(Map&lt;String, Queue&lt;Card&gt;&gt; playerCollectedCards) {
+		Map&lt;String, Integer&gt; playersScores = countPlayersScores(playerCollectedCards, playerCollectedScopa);
+		for (Map.Entry&lt;String, Integer&gt; player : playersScores.entrySet()) {
+			System.out.println(player.getKey() + &quot; a &quot; + player.getValue() + &quot; points.&quot;);
+		}
+	}
+	*/
+
+	/**
+	 * give some card to a player
+	 *
+	 * @param playerName the player that will receive the cards
+	 * @param cards      the cards as a collection of cards
+	 */
+	protected abstract void giveCardsToPlayer(Collection&lt;Card&gt; cards, String playerName);
+
+	/**
+	 * get a card from a player
+	 *
+	 * @param player the player to give card
+	 * @return the card from the player
+	 * @throws NoMoreCardException if the player does not have a remaining card
+	 */
+	protected abstract Card getCardFromPlayer(String player) throws NoMoreCardException;
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

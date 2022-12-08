@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CardValue.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">l3-poo-war</a> &gt; <a href="index.source.html" class="el_package">fr.pantheonsorbonne.miage.enums</a> &gt; <span class="el_source">CardValue.java</span></div><h1>CardValue.java</h1><pre class="source lang-java linenums">package fr.pantheonsorbonne.miage.enums;
+
+<span class="fc" id="L3">public enum CardValue {</span>
+<span class="fc" id="L4">    ACE(&quot;1&quot;, 1),</span>
+<span class="fc" id="L5">    TWO(&quot;2&quot;, 2),</span>
+<span class="fc" id="L6">    THREE(&quot;3&quot;, 3),</span>
+<span class="fc" id="L7">    FOUR(&quot;4&quot;, 4),</span>
+<span class="fc" id="L8">    FIVE(&quot;5&quot;, 5),</span>
+<span class="fc" id="L9">    SIX(&quot;6&quot;, 6),</span>
+<span class="fc" id="L10">    SEVEN(&quot;7&quot;, 7),</span>
+<span class="fc" id="L11">    JACK(&quot;J&quot;, 8),</span>
+<span class="fc" id="L12">    QUEEN(&quot;Q&quot;, 9),</span>
+<span class="fc" id="L13">    KING(&quot;K&quot;, 10);</span>
+
+    final private String stringRepresentation;
+    final private int rank;
+
+<span class="fc" id="L18">    CardValue(String stringRepresentation, int value) {</span>
+<span class="fc" id="L19">        this.stringRepresentation = stringRepresentation;</span>
+<span class="fc" id="L20">        this.rank = value;</span>
+<span class="fc" id="L21">    }</span>
+
+    public static CardValue valueOfStr(String str) {
+<span class="nc bnc" id="L24" title="All 2 branches missed.">        for (CardValue value : CardValue.values()) {</span>
+<span class="nc bnc" id="L25" title="All 2 branches missed.">            if (str.equals(value.getStringRepresentation())) {</span>
+<span class="nc" id="L26">                return value;</span>
+            }
+        }
+
+<span class="nc" id="L30">        throw new RuntimeException(&quot;failed to parse value&quot;);</span>
+
+    }
+
+    public String getStringRepresentation() {
+<span class="fc" id="L35">        return stringRepresentation;</span>
+    }
+
+    public int getRank() {
+<span class="nc" id="L39">        return rank;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

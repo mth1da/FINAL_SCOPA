@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScopaNetworkEngine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">l3-poo-war</a> &gt; <a href="index.source.html" class="el_package">fr.pantheonsorbonne.miage</a> &gt; <span class="el_source">ScopaNetworkEngine.java</span></div><h1>ScopaNetworkEngine.java</h1><pre class="source lang-java linenums">package fr.pantheonsorbonne.miage;
+
+import fr.pantheonsorbonne.miage.Facade;
+import fr.pantheonsorbonne.miage.HostFacade;
+import fr.pantheonsorbonne.miage.exception.NoMoreCardException;
+import fr.pantheonsorbonne.miage.game.Card;
+import fr.pantheonsorbonne.miage.model.Game;
+import fr.pantheonsorbonne.miage.model.GameCommand;
+
+
+import java.util.*;
+
+/**
+ * This class implements the scopa with the network engine
+ */
+public class ScopaNetworkEngine extends ScopaEngine {
+    private static final int PLAYER_COUNT = 4;
+    private static final String CARDSFORYOU = &quot;cardsForYou&quot;;
+
+    private final HostFacade hostFacade;
+    private final Set&lt;String&gt; players;
+    private final Game scopa;
+
+<span class="nc" id="L24">    public ScopaNetworkEngine(HostFacade hostFacade, Set&lt;String&gt; players, fr.pantheonsorbonne.miage.model.Game scopa) {</span>
+<span class="nc" id="L25">        this.hostFacade = hostFacade;</span>
+<span class="nc" id="L26">        this.players = players;</span>
+<span class="nc" id="L27">        this.scopa = scopa;</span>
+<span class="nc" id="L28">    }</span>
+
+    public static void main(String[] args) {
+        //create the host facade
+<span class="nc" id="L32">        HostFacade hostFacade = Facade.getFacade();</span>
+<span class="nc" id="L33">        hostFacade.waitReady();</span>
+
+        //set the name of the player
+<span class="nc" id="L36">        hostFacade.createNewPlayer(&quot;Host&quot;);</span>
+
+        //create a new game of scopa
+<span class="nc" id="L39">        fr.pantheonsorbonne.miage.model.Game scopa = hostFacade.createNewGame(&quot;SCOPA&quot;);</span>
+
+        //wait for enough players to join
+<span class="nc" id="L42">        hostFacade.waitForExtraPlayerCount(PLAYER_COUNT);</span>
+
+<span class="nc" id="L44">        ScopaEngine host = new ScopaNetworkEngine(hostFacade, scopa.getPlayers(), scopa);</span>
+<span class="nc" id="L45">        host.play();</span>
+
+
+<span class="nc" id="L48">    }</span>
+
+    /**
+     * get the set of players initially in the game
+     *
+     * @return
+     */
+    @Override
+    protected Set&lt;String&gt; getInitialPlayers() {
+<span class="nc" id="L57">        return this.scopa.getPlayers();</span>
+    }
+
+    /**
+     * give this hand (as string) the the provided player
+     *
+     * @param playerName name of the player to receive the cards
+     * @param hand       the cards as Strings
+     */
+    @Override
+    protected void giveCardsToPlayer(String playerName, String hand) {
+<span class="nc" id="L68">        hostFacade.sendGameCommandToPlayer(scopa, playerName, new GameCommand(CARDSFORYOU, hand));</span>
+<span class="nc" id="L69">    }</span>
+
+
+    @Override
+    protected void declareWinner(String winner) {
+<span class="nc" id="L74">        hostFacade.sendGameCommandToPlayer(scopa, winner, new GameCommand(&quot;gameOver&quot;, &quot;win&quot;));</span>
+<span class="nc" id="L75">    }</span>
+
+    /**
+     * Try to get a card from the player. If it fails, give roundStack to the other player
+     *
+     * @param leftOverCard               current cards at stake
+     * @param cardProviderPlayer         the player (to provide a card)
+     * @param cardProviderPlayerOpponent its opponent (to receive the stack if contestantA does not have cards anymore)
+     * @return the card from contestant A or null if contetant A is gameover
+     */
+    @Override
+    protected Card getCardOrGameOver(Collection&lt;Card&gt; leftOverCard, String cardProviderPlayer, String cardProviderPlayerOpponent) {
+
+        try {
+<span class="nc" id="L89">            return getCardFromPlayer(cardProviderPlayer);</span>
+<span class="nc" id="L90">        } catch (NoMoreCardException nmc) {</span>
+            //contestant A is out of cards
+            //we send him a gameover
+<span class="nc" id="L93">            hostFacade.sendGameCommandToPlayer(scopa, cardProviderPlayer, new GameCommand(&quot;gameOver&quot;));</span>
+            //remove him from the queue so he won't play again
+<span class="nc" id="L95">            players.remove(cardProviderPlayer);</span>
+            //give back all the cards for this round to the second players
+<span class="nc" id="L97">            hostFacade.sendGameCommandToPlayer(scopa, cardProviderPlayerOpponent, new GameCommand(CARDSFORYOU, Card.cardsToString(leftOverCard.toArray(new Card[leftOverCard.size()]))));</span>
+<span class="nc" id="L98">            return null;</span>
+        }
+
+    }
+
+    /**
+     * give this stack of card to the winner player
+     *
+     * @param roundStack a stack of card at stake
+     * @param winner     the winner
+     */
+    @Override
+    protected void giveCardsToPlayer(Collection&lt;Card&gt; roundStack, String winner) {
+<span class="nc" id="L111">        List&lt;Card&gt; cards = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L112">        cards.addAll(roundStack);</span>
+        //shuffle the round deck so we are not stuck
+<span class="nc" id="L114">        Collections.shuffle(cards);</span>
+<span class="nc" id="L115">        hostFacade.sendGameCommandToPlayer(scopa, winner, new GameCommand(CARDSFORYOU, Card.cardsToString(cards.toArray(new Card[cards.size()]))));</span>
+<span class="nc" id="L116">    }</span>
+
+    /**
+     * we get a card from a player, if possible.
+     * &lt;p&gt;
+     * If the player has no more card, throw an exception
+     *
+     * @param player the name of the player
+     * @return a card from a player
+     * @throws NoMoreCardException if player has no more card.
+     */
+    @Override
+    protected Card getCardFromPlayer(String player) throws NoMoreCardException {
+<span class="nc" id="L129">        hostFacade.sendGameCommandToPlayer(scopa, player, new GameCommand(&quot;playACard&quot;));</span>
+<span class="nc" id="L130">        GameCommand expectedCard = hostFacade.receiveGameCommand(scopa);</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        if (expectedCard.name().equals(&quot;card&quot;)) {</span>
+<span class="nc" id="L132">            return Card.valueOf(expectedCard.body());</span>
+        }
+<span class="nc bnc" id="L134" title="All 2 branches missed.">        if (expectedCard.name().equals(&quot;outOfCard&quot;)) {</span>
+<span class="nc" id="L135">            throw new NoMoreCardException();</span>
+        }
+        //should not happen!
+<span class="nc" id="L138">        throw new RuntimeException(&quot;invalid state&quot;);</span>
+
+    }
+
+    @Override
+    protected Queue&lt;Card&gt; getPlayerCards(String playerName) {
+<span class="nc" id="L144">        return new LinkedList&lt;&gt;();</span>
+    }
+
+	@Override
+	protected Map&lt;String, Queue&lt;Card&gt;&gt; allPlayerCards() {
+<span class="nc" id="L149">		return new HashMap&lt;&gt;();</span>
+	}
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

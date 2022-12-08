@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LocalScopa.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">l3-poo-war</a> &gt; <a href="index.source.html" class="el_package">fr.pantheonsorbonne.miage</a> &gt; <span class="el_source">LocalScopa.java</span></div><h1>LocalScopa.java</h1><pre class="source lang-java linenums">package fr.pantheonsorbonne.miage;
+
+import fr.pantheonsorbonne.miage.exception.NoMoreCardException;
+import fr.pantheonsorbonne.miage.game.Card;
+
+import java.util.*;
+
+/**
+ * this class implements the scopa locally
+ */
+public class LocalScopa extends ScopaEngine {
+
+    private final Set&lt;String&gt; initialPlayers;
+<span class="fc" id="L14">    private final Map&lt;String, Queue&lt;Card&gt;&gt; playerCards = new HashMap&lt;&gt;();</span>
+
+    protected Queue&lt;Card&gt; getPlayerCards(String playerName){
+<span class="fc" id="L17">        return playerCards.get(playerName);</span>
+    }
+    
+    protected Map&lt;String, Queue&lt;Card&gt;&gt; allPlayerCards(){
+<span class="nc" id="L21">    	return playerCards;</span>
+    }
+
+<span class="fc" id="L24">    public LocalScopa(Set&lt;String&gt; initialPlayers) {</span>
+<span class="fc" id="L25">        this.initialPlayers = initialPlayers;</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        for (String player : initialPlayers) {</span>
+<span class="fc" id="L27">            playerCards.put(player, new LinkedList&lt;&gt;());</span>
+<span class="fc" id="L28">        }</span>
+<span class="fc" id="L29">    }</span>
+
+    @Override
+    protected Map&lt;String, Integer&gt; countPlayersScores(Map&lt;String, Queue&lt;Card&gt;&gt; playerCollectedCards, Map&lt;String, Integer&gt; playerCollectedScopa){
+<span class="fc" id="L33">    	return super.countPlayersScores(playerCollectedCards, playerCollectedScopa);</span>
+    }
+
+
+    public static void main(String... args) {
+<span class="nc" id="L38">        LocalScopa localScopa = new LocalScopa(Set.of(&quot;Joueur1&quot;, &quot;Joueur2&quot;, &quot;Joueur3&quot;, &quot;Joueur4&quot;));</span>
+<span class="nc" id="L39">        localScopa.play();</span>
+
+<span class="nc" id="L41">    }</span>
+
+    @Override
+    protected Set&lt;String&gt; getInitialPlayers() {
+<span class="fc" id="L45">        return this.initialPlayers;</span>
+    }
+
+    @Override
+    protected void giveCardsToPlayer(String playerName, String hand) {
+<span class="nc" id="L50">        List&lt;Card&gt; cards = Arrays.asList(Card.stringToCards(hand));</span>
+<span class="nc" id="L51">        this.giveCardsToPlayer(cards, playerName);</span>
+<span class="nc" id="L52">    }</span>
+
+    @Override
+    protected void declareWinner(String winner) {
+<span class="nc" id="L56">        System.out.println(winner + &quot; has won!&quot;);</span>
+<span class="nc" id="L57">    }</span>
+
+    @Override
+    protected Card getCardOrGameOver(Collection&lt;Card&gt; leftOverCard, String cardProviderPlayer, String cardProviderPlayerOpponent) {
+
+<span class="nc bnc" id="L62" title="All 4 branches missed.">        if (!this.playerCards.containsKey(cardProviderPlayer) || this.playerCards.get(cardProviderPlayer).isEmpty()) {</span>
+<span class="nc" id="L63">            this.playerCards.get(cardProviderPlayerOpponent).addAll(leftOverCard);</span>
+<span class="nc" id="L64">            this.playerCards.remove(cardProviderPlayer);</span>
+<span class="nc" id="L65">            return null;</span>
+        } else {
+<span class="nc" id="L67">            return this.playerCards.get(cardProviderPlayer).poll();</span>
+        }
+    }
+
+    @Override
+    protected void giveCardsToPlayer(Collection&lt;Card&gt; roundStack, String winner) {
+<span class="nc" id="L73">        List&lt;Card&gt; cards = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L74">        cards.addAll(roundStack);</span>
+<span class="nc" id="L75">        Collections.shuffle(cards);</span>
+<span class="nc" id="L76">        this.playerCards.get(winner).addAll(cards);</span>
+<span class="nc" id="L77">    }</span>
+
+    @Override
+    protected Card getCardFromPlayer(String player) throws NoMoreCardException {
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        if (this.playerCards.get(player).isEmpty()) {</span>
+<span class="nc" id="L82">            throw new NoMoreCardException();</span>
+        } else {
+<span class="nc" id="L84">        	Card card= this.playerCards.get(player).poll();</span>
+<span class="nc bnc" id="L85" title="All 4 branches missed.">        	if (card.toString().equals(&quot;7D&quot;) &amp;&amp; !this.playerCards.get(player).isEmpty()) {</span>
+<span class="nc" id="L86">        			Card secondCard = this.playerCards.get(player).poll();</span>
+<span class="nc" id="L87">        			this.playerCards.get(player).offer(card);</span>
+<span class="nc" id="L88">        			card=secondCard;</span>
+        	}        	
+<span class="nc" id="L90">            return card;</span>
+        }
+    }
+
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

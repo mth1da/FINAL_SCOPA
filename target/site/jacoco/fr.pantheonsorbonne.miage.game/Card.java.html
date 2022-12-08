@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Card.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">l3-poo-war</a> &gt; <a href="index.source.html" class="el_package">fr.pantheonsorbonne.miage.game</a> &gt; <span class="el_source">Card.java</span></div><h1>Card.java</h1><pre class="source lang-java linenums">package fr.pantheonsorbonne.miage.game;
+
+import fr.pantheonsorbonne.miage.enums.CardColor;
+import fr.pantheonsorbonne.miage.enums.CardValue;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
+public class Card {
+
+    private final CardColor color;
+    private final CardValue value;
+
+
+<span class="fc" id="L15">    public Card(CardColor color, CardValue value) {</span>
+<span class="fc" id="L16">        this.color = color;</span>
+<span class="fc" id="L17">        this.value = value;</span>
+<span class="fc" id="L18">    }</span>
+
+    /**
+     * For a String representation of a card, return the card
+     *
+     * @param str
+     * @return the card
+     * @throws RuntimeException if the String representation is Invaliid
+     */
+    public static Card valueOf(String str) {
+        CardValue value;
+        CardColor color;
+<span class="nc bnc" id="L30" title="All 2 branches missed.">        if (str.length() == 3) {//it's a 10</span>
+<span class="nc" id="L31">            value = CardValue.valueOfStr(str.substring(0, 2));</span>
+<span class="nc" id="L32">            color = CardColor.valueOfStr(str.substring(2, 3));</span>
+        } else {
+<span class="nc" id="L34">            value = CardValue.valueOfStr(str.substring(0, 1));</span>
+<span class="nc" id="L35">            color = CardColor.valueOfStr(str.substring(1, 2));</span>
+        }
+<span class="nc" id="L37">        return new Card(color, value);</span>
+
+    }
+
+    public static String cardsToString(Card[] cards) {
+<span class="nc" id="L42">        return Arrays.stream(cards).map(Card::toString).collect(Collectors.joining(&quot;;&quot;));</span>
+    }
+
+    public static Card[] stringToCards(String cards) {
+<span class="nc bnc" id="L46" title="All 2 branches missed.">        if (cards.isEmpty()) {</span>
+<span class="nc" id="L47">            return new Card[0];</span>
+        }
+<span class="nc" id="L49">        return (Card[]) Arrays.stream(cards.split(&quot;;&quot;)).map(Card::valueOf).toArray(Card[]::new);</span>
+    }
+
+
+    /**
+     * Get the color of the card
+     *
+     * @return
+     */
+    public CardColor getColor() {
+<span class="fc" id="L59">        return color;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L64">        return this.getValue().getStringRepresentation() + this.getColor().getStringRepresentation();</span>
+    }
+
+    public String toFancyString() {
+
+<span class="nc" id="L69">        int rank = this.getValue().ordinal();</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">        if (rank &gt; 6) {</span>
+<span class="nc" id="L71">            rank=rank+4;</span>
+        }
+<span class="nc" id="L73">        return new String(Character.toChars(this.color.getCode() + rank));</span>
+    }
+
+    /**
+     * get the value of the card
+     *
+     * @return
+     */
+    public CardValue getValue() {
+<span class="fc" id="L82">        return value;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
