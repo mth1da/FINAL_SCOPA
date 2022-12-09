@@ -3,6 +3,8 @@ package fr.pantheonsorbonne.miage;
 import fr.pantheonsorbonne.miage.Facade;
 import fr.pantheonsorbonne.miage.HostFacade;
 import fr.pantheonsorbonne.miage.exception.NoMoreCardException;
+import fr.pantheonsorbonne.miage.exception.NoSuchPlayerException;
+import fr.pantheonsorbonne.miage.exception.TotalCollectedCardException;
 import fr.pantheonsorbonne.miage.game.Card;
 import fr.pantheonsorbonne.miage.model.Game;
 import fr.pantheonsorbonne.miage.model.GameCommand;
@@ -27,7 +29,7 @@ public class ScopaNetworkEngine extends ScopaEngine {
         this.scopa = scopa;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws TotalCollectedCardException, NoSuchPlayerException {
         //create the host facade
         HostFacade hostFacade = Facade.getFacade();
         hostFacade.waitReady();
