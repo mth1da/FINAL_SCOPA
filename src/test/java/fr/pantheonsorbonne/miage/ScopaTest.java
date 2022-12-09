@@ -11,6 +11,7 @@ import fr.pantheonsorbonne.miage.enums.CardColor;
 import fr.pantheonsorbonne.miage.enums.CardValue;
 import fr.pantheonsorbonne.miage.exception.NoMoreCardException;
 import fr.pantheonsorbonne.miage.game.Card;
+import fr.pantheonsorbonne.miage.game.Deck;
 
 class ScopaTest extends ScopaEngine{
 
@@ -77,6 +78,13 @@ class ScopaTest extends ScopaEngine{
     }
 
     /*
+     * 
+     */
+    void noCardsWithPlayersTest(){
+
+    }
+
+    /*
      * tests on making a pair
      */
     @Test
@@ -98,6 +106,75 @@ class ScopaTest extends ScopaEngine{
 
         assertEquals(carteAttendue, carteObtenue.toString());
     }
+
+    @Test
+    void makePairWithSettebelloInDeckTest(){
+
+        roundDeckTest.add(new Card(CardColor.HEART, CardValue.ACE));
+        roundDeckTest.add(new Card(CardColor.CLUB, CardValue.KING));
+        roundDeckTest.add(new Card(CardColor.DIAMOND, CardValue.SEVEN));
+        roundDeckTest.add(new Card(CardColor.SPADE, CardValue.SIX));
+
+        playerCardsTest.add(new Card(CardColor.HEART, CardValue.SEVEN));
+        playerCardsTest.add(new Card(CardColor.DIAMOND, CardValue.ACE));
+        playerCardsTest.add(new Card(CardColor.SPADE, CardValue.KING));
+
+        var test = new LocalScopa(Set.of("Joueur1"));
+
+        assertEquals("7H", (test.makePair(playerCardsTest,roundDeckTest)).get(0).toString());
+    }
+
+    @Test
+    void makePairWithSettebelloInHandTest(){
+
+        roundDeckTest.add(new Card(CardColor.HEART, CardValue.ACE));
+        roundDeckTest.add(new Card(CardColor.CLUB, CardValue.KING));
+        roundDeckTest.add(new Card(CardColor.HEART, CardValue.SEVEN));
+        roundDeckTest.add(new Card(CardColor.SPADE, CardValue.SIX));
+
+        playerCardsTest.add(new Card(CardColor.DIAMOND, CardValue.SEVEN));
+        playerCardsTest.add(new Card(CardColor.DIAMOND, CardValue.ACE));
+        playerCardsTest.add(new Card(CardColor.SPADE, CardValue.KING));
+
+        var test = new LocalScopa(Set.of("Joueur1"));
+
+        assertEquals("7D", test.makePair(playerCardsTest,roundDeckTest).get(0).toString());
+    }
+    
+    @Test
+    void makePairWithDenierInDeckTest(){
+
+        roundDeckTest.add(new Card(CardColor.HEART, CardValue.ACE));
+        roundDeckTest.add(new Card(CardColor.CLUB, CardValue.KING));
+        roundDeckTest.add(new Card(CardColor.DIAMOND, CardValue.FIVE));
+        roundDeckTest.add(new Card(CardColor.SPADE, CardValue.SIX));
+
+        playerCardsTest.add(new Card(CardColor.HEART, CardValue.SEVEN));
+        playerCardsTest.add(new Card(CardColor.DIAMOND, CardValue.ACE));
+        playerCardsTest.add(new Card(CardColor.SPADE, CardValue.FIVE));
+
+        var test = new LocalScopa(Set.of("Joueur1"));
+
+        assertEquals("5S", test.makePair(playerCardsTest,roundDeckTest).get(0).toString());
+    }
+
+    @Test
+    void makePairWithDenierInHandTest(){
+
+        roundDeckTest.add(new Card(CardColor.HEART, CardValue.ACE));
+        roundDeckTest.add(new Card(CardColor.CLUB, CardValue.KING));
+        roundDeckTest.add(new Card(CardColor.CLUB, CardValue.FIVE));
+        roundDeckTest.add(new Card(CardColor.SPADE, CardValue.SIX));
+
+        playerCardsTest.add(new Card(CardColor.HEART, CardValue.SEVEN));
+        playerCardsTest.add(new Card(CardColor.DIAMOND, CardValue.ACE));
+        playerCardsTest.add(new Card(CardColor.SPADE, CardValue.FIVE));
+
+        var test = new LocalScopa(Set.of("Joueur1"));
+
+        assertEquals("1D", test.makePair(playerCardsTest,roundDeckTest).get(0).toString());
+    }
+
 
     @Test
     void cantMakePairTest() {
@@ -738,19 +815,42 @@ class ScopaTest extends ScopaEngine{
         var test = new LocalScopa(Set.of("Joueur1", "Joueur2", "Joueur3"));
 
         assertEquals("Joueur1", test.getWinner(playerCollectedCardsTest));
-
     }
 
     @Test
-    void playTest(){
+    public void getNoWinnerTest(){
 
+        //Joueur1's collected cards
+        J1collectedCards.add(new Card(CardColor.SPADE, CardValue.SEVEN));
+        J1collectedCards.add(new Card(CardColor.CLUB, CardValue.SEVEN));
+        
+        //Joueur2's collected cards
+        J2collectedCards.add(new Card(CardColor.SPADE, CardValue.QUEEN));
+        J2collectedCards.add(new Card(CardColor.DIAMOND, CardValue.QUEEN));
+
+        //Joueur3's collected cards
+        J3collectedCards.add(new Card(CardColor.CLUB, CardValue.FOUR));
+        J3collectedCards.add(new Card(CardColor.HEART, CardValue.FOUR));
+        J3collectedCards.add(new Card(CardColor.CLUB, CardValue.KING));
+        J3collectedCards.add(new Card(CardColor.SPADE, CardValue.KING));
+
+        playerCollectedCardsTest.put("Joueur1", J1collectedCards);
+        playerCollectedCardsTest.put("Joueur2", J2collectedCards);
+        playerCollectedCardsTest.put("Joueur3", J3collectedCards);
+
+        var test = new LocalScopa(Set.of("Joueur1", "Joueur2", "Joueur3"));
+
+        assertEquals("nobody", test.getWinner(playerCollectedCardsTest));
     }
 
-    @Override
-    protected Map<String, Queue<Card>> allPlayerCards() {
-        // TODO Auto-generated method stub
-        return null;
+    @Test
+    void declareWinner() {
+        var test = new LocalScopa(Set.of("Joueur1", "Joueur2", "Joueur3"));
+        test.declareWinner("Joueur1");
+        //nothing to test here, as the winner declaration is just a prompt
     }
+
+    
 
     @Override
     protected Queue<Card> getPlayerCards(String playerName) {
@@ -795,4 +895,3 @@ class ScopaTest extends ScopaEngine{
         return null;
     }
 }
-

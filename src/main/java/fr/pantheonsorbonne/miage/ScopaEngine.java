@@ -26,7 +26,7 @@ public abstract class ScopaEngine {
 
 	Map<String, Queue<Card>> playerCollectedCards = new HashMap<>();
 	Map<String, Integer> playerCollectedScopa = new HashMap<>();
-	protected abstract Map<String, Queue<Card>> allPlayerCards();
+	
 	
 
 	/**
@@ -55,9 +55,6 @@ public abstract class ScopaEngine {
 
 		// repeat until there are no more cards in deck and until the players don't have any cards left to play
 		while (Deck.deckSize > 1 || !noCardsWithPlayers()) {
-
-			//a supp
-			//printCardStat(roundDeck);
 
 			// take the first player form the queue
 			String currentPlayer = players.poll();
@@ -96,8 +93,6 @@ public abstract class ScopaEngine {
 			System.out.println("\n");
 
 		}
-		//A SUPPRIMER
-		//printCardStat(roundDeck);
 
 		//since we've left the loop, the game is over
 		//we give the remaning cards to the last player having played
@@ -106,20 +101,6 @@ public abstract class ScopaEngine {
 		//displaying the collected cards of each player
 		displayPlayerCollectedCards(players);
 		
-		/*A SUPPRIMER
-		int count=0;
-		for (String currentPlayer : getInitialPlayers()){
-			count=count+ playerCollectedCards.get(currentPlayer).size();
-		}
-		System.out.println("nb cartes : " +count);
-		*/
-		
-		//making sure the round deck is empty
-		/*A SUPPRIMER 
-		System.out.print("RoundDeck: ");
-		roundDeck.stream().forEach(c -> System.out.print(c.toFancyString()));
-		System.out.println();
-		*/
 		
 		//get the winner
 		String winner = getWinner(playerCollectedCards);
@@ -134,7 +115,7 @@ public abstract class ScopaEngine {
 			// get random cards
 			Card[] cards = Deck.getRandomCards(CARDS_IN_HAND_INITIAL_COUNT);
 			// transform them to String
-			String hand = Card.cardsToString(cards); // changer ça si on utilise pas le string
+			String hand = Card.cardsToString(cards); 
 			// send them to this players
 			giveCardsToPlayer(playerName, hand);
 
@@ -179,21 +160,6 @@ public abstract class ScopaEngine {
 			count=count+getPlayerCards(player).size();
 		}	
 		return count==0;
-	}
-
-	//A SUPPRIMER
-	protected void printCardStat(Queue<Card> roundDeck) {
-		int count=roundDeck.size()+Deck.deckSize;
-		System.out.println("roundDeck: "+roundDeck.size());
-		System.out.println("Deck: "+Deck.deckSize);
-		for(String player:getInitialPlayers()) {
-			count=count+getPlayerCards(player).size()+playerCollectedCards.get(player).size();
-			System.out.println("Player "+player+": "+getPlayerCards(player).size());
-			System.out.println("Player Collected "+player+": "+playerCollectedCards.get(player).size());
-		}
-		
-		System.out.println("*********************\n"+count+"*********************\n");
-		
 	}
 
 	/*
@@ -566,17 +532,6 @@ public abstract class ScopaEngine {
 	protected abstract Card getCardOrGameOver(Collection<Card> leftOverCard, String cardProviderPlayer,
 			String cardProviderPlayerOpponent);
 
-	
-
-	// not used for now A SUPPRIMER
-	/*
-	protected void getCountPlayersScores(Map<String, Queue<Card>> playerCollectedCards) {
-		Map<String, Integer> playersScores = countPlayersScores(playerCollectedCards, playerCollectedScopa);
-		for (Map.Entry<String, Integer> player : playersScores.entrySet()) {
-			System.out.println(player.getKey() + " a " + player.getValue() + " points.");
-		}
-	}
-	*/
 
 	/**
 	 * give some card to a player

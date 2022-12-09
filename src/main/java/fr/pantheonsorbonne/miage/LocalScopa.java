@@ -17,9 +17,7 @@ public class LocalScopa extends ScopaEngine {
         return playerCards.get(playerName);
     }
     
-    protected Map<String, Queue<Card>> allPlayerCards(){
-    	return playerCards;
-    }
+    
 
     public LocalScopa(Set<String> initialPlayers) {
         this.initialPlayers = initialPlayers;

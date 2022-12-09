@@ -3,9 +3,9 @@ l3-poo-war,fr.pantheonsorbonne.miage.enums,CardColor,34,45,4,0,5,9,4,3,2,3
 l3-poo-war,fr.pantheonsorbonne.miage.enums,CardValue,31,97,4,0,5,16,4,3,2,3
 l3-poo-war,fr.pantheonsorbonne.miage.exception,NoMoreCardException,7,0,0,0,4,0,2,0,2,0
 l3-poo-war,fr.pantheonsorbonne.miage,ScopaNetworkPlayer,128,0,12,0,29,0,13,0,6,0
-l3-poo-war,fr.pantheonsorbonne.miage,LocalScopa,134,44,10,2,27,10,12,5,7,4
-l3-poo-war,fr.pantheonsorbonne.miage,ScopaEngine,344,778,28,92,78,157,27,63,10,20
-l3-poo-war,fr.pantheonsorbonne.miage,ScopaNetworkEngine,179,0,4,0,38,0,12,0,10,0
+l3-poo-war,fr.pantheonsorbonne.miage,LocalScopa,126,49,10,2,24,12,10,6,5,5
+l3-poo-war,fr.pantheonsorbonne.miage,ScopaEngine,255,804,21,97,62,163,20,68,9,20
+l3-poo-war,fr.pantheonsorbonne.miage,ScopaNetworkEngine,175,0,4,0,37,0,11,0,9,0
 l3-poo-war,fr.pantheonsorbonne.miage.game,Card,84,23,6,0,14,7,8,4,5,4
 l3-poo-war,fr.pantheonsorbonne.miage.game,Deck,110,0,8,0,18,0,7,0,3,0
 l3-poo-war,fr.pantheonsorbonne.miage.utils,ConsoleColors,3,0,0,0,1,0,1,0,1,0

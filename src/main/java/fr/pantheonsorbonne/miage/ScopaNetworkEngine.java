@@ -144,10 +144,7 @@ public class ScopaNetworkEngine extends ScopaEngine {
         return new LinkedList<>();
     }
 
-	@Override
-	protected Map<String, Queue<Card>> allPlayerCards() {
-		return new HashMap<>();
-	}
+	
 
 }
 
