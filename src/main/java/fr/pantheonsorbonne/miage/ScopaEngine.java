@@ -23,14 +23,23 @@ public abstract class ScopaEngine {
 	public static final int CARDS_IN_HAND_INITIAL_COUNT = 3;
 	private static final String DENIER = "DIAMOND";
 
+	protected boolean enableTotalCollException=true;
+
 	Map<String, Queue<Card>> playerCollectedCards = new HashMap<>();
 	Map<String, Integer> playerCollectedScopa = new HashMap<>();
 	Queue<Card> roundDeck = new LinkedList<>();
 
+	protected int getDeckSize(){
+		return Deck.deckSize;
+	}
+
+	protected Card[] getDeckRandomCards(int n) {
+		return Deck.getRandomCards(n);
+	}
 	/**
 	 * play a scopa with the provided players
 	 */
-	public void play() throws TotalCollectedCardException, NoSuchPlayerException {
+	public String play() throws TotalCollectedCardException, NoSuchPlayerException {
 
 		// send the initial hand to every players
 		giveInitialHandToPLayers();
@@ -54,7 +63,7 @@ public abstract class ScopaEngine {
 
 		// repeat until there are no more cards in deck and until the players don't have
 		// any cards left to play
-		while (Deck.deckSize > 1 || !noCardsWithPlayers()) {
+		while (getDeckSize() > 1 || !noCardsWithPlayers()) {
 
 			// take the first player form the queue
 			String currentPlayer = players.poll();
@@ -85,7 +94,7 @@ public abstract class ScopaEngine {
 				}
 			} else {
 
-				Card[] cards = Deck.getRandomCards(CARDS_IN_HAND_INITIAL_COUNT);
+				Card[] cards = getDeckRandomCards(CARDS_IN_HAND_INITIAL_COUNT);
 				String hand = Card.cardsToString(cards);
 				giveCardsToPlayer(currentPlayer, hand);
 			}
@@ -107,13 +116,13 @@ public abstract class ScopaEngine {
 		
 		// get the winner & send him the gameover & leave
 		declareWinner(getWinner(playerCollectedCards));
-		System.exit(0);
+		return getWinner(playerCollectedCards);
 	}
 
 	protected void giveInitialHandToPLayers() {
 		for (String playerName : getInitialPlayers()) {
 			// get random cards
-			Card[] cards = Deck.getRandomCards(CARDS_IN_HAND_INITIAL_COUNT);
+			Card[] cards = getDeckRandomCards(CARDS_IN_HAND_INITIAL_COUNT);
 			// transform them to String
 			String hand = Card.cardsToString(cards); 
 			// send them to this players
@@ -130,7 +139,7 @@ public abstract class ScopaEngine {
 	}
 
 	protected List<Card> getInitialRoundDeck() {
-		return Arrays.asList(Deck.getRandomCards(4));
+		return Arrays.asList(getDeckRandomCards(4));
 	}
 
 	/**
@@ -533,7 +542,7 @@ public abstract class ScopaEngine {
 			count = count + playerCollectedCards.get(currentPlayer).size();
 		}
 
-		if (count != 40)
+		if (enableTotalCollException && count != 40)
 			throw new TotalCollectedCardException(count);
 	}
 
