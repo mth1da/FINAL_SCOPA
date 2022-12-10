@@ -16,9 +16,9 @@
 <span class="fc" id="L16">    }</span>
 
     public static CardColor valueOfStr(String substring) {
-<span class="nc bnc" id="L19" title="All 2 branches missed.">        for (CardColor color : CardColor.values()) {</span>
-<span class="nc bnc" id="L20" title="All 2 branches missed.">            if (color.name().substring(0, 1).equals(substring)) {</span>
-<span class="nc" id="L21">                return color;</span>
+<span class="pc bpc" id="L19" title="1 of 2 branches missed.">        for (CardColor color : CardColor.values()) {</span>
+<span class="fc bfc" id="L20" title="All 2 branches covered.">            if (color.name().substring(0, 1).equals(substring)) {</span>
+<span class="fc" id="L21">                return color;</span>
             }
         }
 <span class="nc" id="L24">        throw new RuntimeException(&quot;No Such Color&quot;);</span>

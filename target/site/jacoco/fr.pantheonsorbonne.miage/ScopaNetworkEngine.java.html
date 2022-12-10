@@ -3,6 +3,8 @@
 import fr.pantheonsorbonne.miage.Facade;
 import fr.pantheonsorbonne.miage.HostFacade;
 import fr.pantheonsorbonne.miage.exception.NoMoreCardException;
+import fr.pantheonsorbonne.miage.exception.NoSuchPlayerException;
+import fr.pantheonsorbonne.miage.exception.TotalCollectedCardException;
 import fr.pantheonsorbonne.miage.game.Card;
 import fr.pantheonsorbonne.miage.model.Game;
 import fr.pantheonsorbonne.miage.model.GameCommand;
@@ -21,31 +23,31 @@ public class ScopaNetworkEngine extends ScopaEngine {
     private final Set&lt;String&gt; players;
     private final Game scopa;
 
-<span class="nc" id="L24">    public ScopaNetworkEngine(HostFacade hostFacade, Set&lt;String&gt; players, fr.pantheonsorbonne.miage.model.Game scopa) {</span>
-<span class="nc" id="L25">        this.hostFacade = hostFacade;</span>
-<span class="nc" id="L26">        this.players = players;</span>
-<span class="nc" id="L27">        this.scopa = scopa;</span>
-<span class="nc" id="L28">    }</span>
+<span class="nc" id="L26">    public ScopaNetworkEngine(HostFacade hostFacade, Set&lt;String&gt; players, fr.pantheonsorbonne.miage.model.Game scopa) {</span>
+<span class="nc" id="L27">        this.hostFacade = hostFacade;</span>
+<span class="nc" id="L28">        this.players = players;</span>
+<span class="nc" id="L29">        this.scopa = scopa;</span>
+<span class="nc" id="L30">    }</span>
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws TotalCollectedCardException, NoSuchPlayerException {
         //create the host facade
-<span class="nc" id="L32">        HostFacade hostFacade = Facade.getFacade();</span>
-<span class="nc" id="L33">        hostFacade.waitReady();</span>
+<span class="nc" id="L34">        HostFacade hostFacade = Facade.getFacade();</span>
+<span class="nc" id="L35">        hostFacade.waitReady();</span>
 
         //set the name of the player
-<span class="nc" id="L36">        hostFacade.createNewPlayer(&quot;Host&quot;);</span>
+<span class="nc" id="L38">        hostFacade.createNewPlayer(&quot;Host&quot;);</span>
 
         //create a new game of scopa
-<span class="nc" id="L39">        fr.pantheonsorbonne.miage.model.Game scopa = hostFacade.createNewGame(&quot;SCOPA&quot;);</span>
+<span class="nc" id="L41">        fr.pantheonsorbonne.miage.model.Game scopa = hostFacade.createNewGame(&quot;SCOPA&quot;);</span>
 
         //wait for enough players to join
-<span class="nc" id="L42">        hostFacade.waitForExtraPlayerCount(PLAYER_COUNT);</span>
+<span class="nc" id="L44">        hostFacade.waitForExtraPlayerCount(PLAYER_COUNT);</span>
 
-<span class="nc" id="L44">        ScopaEngine host = new ScopaNetworkEngine(hostFacade, scopa.getPlayers(), scopa);</span>
-<span class="nc" id="L45">        host.play();</span>
+<span class="nc" id="L46">        ScopaEngine host = new ScopaNetworkEngine(hostFacade, scopa.getPlayers(), scopa);</span>
+<span class="nc" id="L47">        host.play();</span>
 
 
-<span class="nc" id="L48">    }</span>
+<span class="nc" id="L50">    }</span>
 
     /**
      * get the set of players initially in the game
@@ -54,7 +56,7 @@ public class ScopaNetworkEngine extends ScopaEngine {
      */
     @Override
     protected Set&lt;String&gt; getInitialPlayers() {
-<span class="nc" id="L57">        return this.scopa.getPlayers();</span>
+<span class="nc" id="L59">        return this.scopa.getPlayers();</span>
     }
 
     /**
@@ -65,14 +67,14 @@ public class ScopaNetworkEngine extends ScopaEngine {
      */
     @Override
     protected void giveCardsToPlayer(String playerName, String hand) {
-<span class="nc" id="L68">        hostFacade.sendGameCommandToPlayer(scopa, playerName, new GameCommand(CARDSFORYOU, hand));</span>
-<span class="nc" id="L69">    }</span>
+<span class="nc" id="L70">        hostFacade.sendGameCommandToPlayer(scopa, playerName, new GameCommand(CARDSFORYOU, hand));</span>
+<span class="nc" id="L71">    }</span>
 
 
     @Override
     protected void declareWinner(String winner) {
-<span class="nc" id="L74">        hostFacade.sendGameCommandToPlayer(scopa, winner, new GameCommand(&quot;gameOver&quot;, &quot;win&quot;));</span>
-<span class="nc" id="L75">    }</span>
+<span class="nc" id="L76">        hostFacade.sendGameCommandToPlayer(scopa, winner, new GameCommand(&quot;gameOver&quot;, &quot;win&quot;));</span>
+<span class="nc" id="L77">    }</span>
 
     /**
      * Try to get a card from the player. If it fails, give roundStack to the other player
@@ -86,16 +88,16 @@ public class ScopaNetworkEngine extends ScopaEngine {
     protected Card getCardOrGameOver(Collection&lt;Card&gt; leftOverCard, String cardProviderPlayer, String cardProviderPlayerOpponent) {
 
         try {
-<span class="nc" id="L89">            return getCardFromPlayer(cardProviderPlayer);</span>
-<span class="nc" id="L90">        } catch (NoMoreCardException nmc) {</span>
+<span class="nc" id="L91">            return getCardFromPlayer(cardProviderPlayer);</span>
+<span class="nc" id="L92">        } catch (NoMoreCardException nmc) {</span>
             //contestant A is out of cards
             //we send him a gameover
-<span class="nc" id="L93">            hostFacade.sendGameCommandToPlayer(scopa, cardProviderPlayer, new GameCommand(&quot;gameOver&quot;));</span>
+<span class="nc" id="L95">            hostFacade.sendGameCommandToPlayer(scopa, cardProviderPlayer, new GameCommand(&quot;gameOver&quot;));</span>
             //remove him from the queue so he won't play again
-<span class="nc" id="L95">            players.remove(cardProviderPlayer);</span>
+<span class="nc" id="L97">            players.remove(cardProviderPlayer);</span>
             //give back all the cards for this round to the second players
-<span class="nc" id="L97">            hostFacade.sendGameCommandToPlayer(scopa, cardProviderPlayerOpponent, new GameCommand(CARDSFORYOU, Card.cardsToString(leftOverCard.toArray(new Card[leftOverCard.size()]))));</span>
-<span class="nc" id="L98">            return null;</span>
+<span class="nc" id="L99">            hostFacade.sendGameCommandToPlayer(scopa, cardProviderPlayerOpponent, new GameCommand(CARDSFORYOU, Card.cardsToString(leftOverCard.toArray(new Card[leftOverCard.size()]))));</span>
+<span class="nc" id="L100">            return null;</span>
         }
 
     }
@@ -108,12 +110,12 @@ public class ScopaNetworkEngine extends ScopaEngine {
      */
     @Override
     protected void giveCardsToPlayer(Collection&lt;Card&gt; roundStack, String winner) {
-<span class="nc" id="L111">        List&lt;Card&gt; cards = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L112">        cards.addAll(roundStack);</span>
+<span class="nc" id="L113">        List&lt;Card&gt; cards = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L114">        cards.addAll(roundStack);</span>
         //shuffle the round deck so we are not stuck
-<span class="nc" id="L114">        Collections.shuffle(cards);</span>
-<span class="nc" id="L115">        hostFacade.sendGameCommandToPlayer(scopa, winner, new GameCommand(CARDSFORYOU, Card.cardsToString(cards.toArray(new Card[cards.size()]))));</span>
-<span class="nc" id="L116">    }</span>
+<span class="nc" id="L116">        Collections.shuffle(cards);</span>
+<span class="nc" id="L117">        hostFacade.sendGameCommandToPlayer(scopa, winner, new GameCommand(CARDSFORYOU, Card.cardsToString(cards.toArray(new Card[cards.size()]))));</span>
+<span class="nc" id="L118">    }</span>
 
     /**
      * we get a card from a player, if possible.
@@ -126,22 +128,22 @@ public class ScopaNetworkEngine extends ScopaEngine {
      */
     @Override
     protected Card getCardFromPlayer(String player) throws NoMoreCardException {
-<span class="nc" id="L129">        hostFacade.sendGameCommandToPlayer(scopa, player, new GameCommand(&quot;playACard&quot;));</span>
-<span class="nc" id="L130">        GameCommand expectedCard = hostFacade.receiveGameCommand(scopa);</span>
-<span class="nc bnc" id="L131" title="All 2 branches missed.">        if (expectedCard.name().equals(&quot;card&quot;)) {</span>
-<span class="nc" id="L132">            return Card.valueOf(expectedCard.body());</span>
+<span class="nc" id="L131">        hostFacade.sendGameCommandToPlayer(scopa, player, new GameCommand(&quot;playACard&quot;));</span>
+<span class="nc" id="L132">        GameCommand expectedCard = hostFacade.receiveGameCommand(scopa);</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">        if (expectedCard.name().equals(&quot;card&quot;)) {</span>
+<span class="nc" id="L134">            return Card.valueOf(expectedCard.body());</span>
         }
-<span class="nc bnc" id="L134" title="All 2 branches missed.">        if (expectedCard.name().equals(&quot;outOfCard&quot;)) {</span>
-<span class="nc" id="L135">            throw new NoMoreCardException();</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">        if (expectedCard.name().equals(&quot;outOfCard&quot;)) {</span>
+<span class="nc" id="L137">            throw new NoMoreCardException();</span>
         }
         //should not happen!
-<span class="nc" id="L138">        throw new RuntimeException(&quot;invalid state&quot;);</span>
+<span class="nc" id="L140">        throw new RuntimeException(&quot;invalid state&quot;);</span>
 
     }
 
     @Override
     protected Queue&lt;Card&gt; getPlayerCards(String playerName) {
-<span class="nc" id="L144">        return new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L146">        return new LinkedList&lt;&gt;();</span>
     }
 
 	

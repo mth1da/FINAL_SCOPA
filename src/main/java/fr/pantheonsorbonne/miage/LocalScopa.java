@@ -43,7 +43,7 @@ public class LocalScopa extends ScopaEngine {
             
             localScopa.play();
         }
-        catch (Throwable e){
+        catch (Exception e){
             System.out.println(e);
         }
         

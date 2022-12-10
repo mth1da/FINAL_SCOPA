@@ -10,8 +10,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import fr.pantheonsorbonne.miage.exception.*;
-
-import fr.pantheonsorbonne.miage.exception.NoMoreCardException;
 import fr.pantheonsorbonne.miage.game.Card;
 import fr.pantheonsorbonne.miage.game.Deck;
 import fr.pantheonsorbonne.miage.enums.CardValue;
@@ -103,27 +101,11 @@ public abstract class ScopaEngine {
 		// displaying the collected cards of each player
 		displayPlayerCollectedCards(players);
 
-		int count = 0;
-		for (String currentPlayer : getInitialPlayers()) {
-			count = count + playerCollectedCards.get(currentPlayer).size();
-		}
 
-		if (count != 40)
-			throw new TotalCollectedCardException(count);
+		countTotalCards();
 
-		// making sure the round deck is empty
-		/*
-		 * A SUPPRIMER
-		 * System.out.print("RoundDeck: ");
-		 * roundDeck.stream().forEach(c -> System.out.print(c.toFancyString()));
-		 * System.out.println();
-		 */
-
-		// get the winner
-
-		String winner = getWinner(playerCollectedCards);
 		
-		// send the winner the gameover and leave
+		// get the winner & send him the gameover & leave
 		declareWinner(getWinner(playerCollectedCards));
 		System.exit(0);
 	}
@@ -178,21 +160,6 @@ public abstract class ScopaEngine {
 			count = count + getPlayerCards(player).size();
 		}
 		return count == 0;
-	}
-
-	// A SUPPRIMER
-	protected void printCardStat(Queue<Card> roundDeck) throws NoSuchPlayerException {
-		int count = roundDeck.size() + Deck.deckSize;
-		System.out.println("roundDeck: " + roundDeck.size());
-		System.out.println("Deck: " + Deck.deckSize);
-		for (String player : getInitialPlayers()) {
-			count = count + getPlayerCards(player).size() + playerCollectedCards.get(player).size();
-			System.out.println("Player " + player + ": " + getPlayerCards(player).size());
-			System.out.println("Player Collected " + player + ": " + playerCollectedCards.get(player).size());
-		}
-
-		System.out.println("*********************\n" + count + "*********************\n");
-
 	}
 
 	/*
@@ -377,7 +344,7 @@ public abstract class ScopaEngine {
 		if (roundDeck.isEmpty()) {
 			int counter = playerCollectedScopa.get(currentPlayer) + 1;
 			playerCollectedScopa.put(currentPlayer, counter);
-			System.out.println(currentPlayer + " made a scopa !");
+			System.out.println(" made a scopa !");
 		}
 		return playerCollectedScopa;
 	}
@@ -421,7 +388,7 @@ public abstract class ScopaEngine {
 		// count the
 		Map<String, Integer> playersScores = countPlayersScores(playerCollectedCards, playerCollectedScopa);
 		for (Map.Entry<String, Integer> player : playersScores.entrySet()) {
-			System.out.println(player.getKey() + " a " + player.getValue() + " points.");
+			System.out.println(player.getKey() + " has " + player.getValue() + " points.");
 			if (player.getValue() > maxCount) {
 				maxCount = player.getValue();
 				winner = player.getKey();
@@ -440,31 +407,41 @@ public abstract class ScopaEngine {
 	 */
 	protected Map<String, Integer> countPlayersScores(Map<String, Queue<Card>> playerCollectedCards,
 			Map<String, Integer> playerCollectedScopa) {
+
 		Map<String, Integer> playersScores = new HashMap<>();
+		ArrayList<String> bestCountPlayers = bestCount(playerCollectedCards);
+		ArrayList<String> mostDenierCountPlayers = mostDenierCount(playerCollectedCards);
+
 		for (Map.Entry<String, Queue<Card>> player : playerCollectedCards.entrySet()) {
 			int count = 0;
-			ArrayList<String> bestCountPlayers = bestCount(playerCollectedCards);
+			
 			for (String joueur : bestCountPlayers) {
 				if (player.getKey().equals(joueur)) {
 					count++;
 				}
 			}
-			ArrayList<String> mostDenierCountPlayers = mostDenierCount(playerCollectedCards);
+			
 			for (String joueur : mostDenierCountPlayers) {
 				if (player.getKey().equals(joueur)) {
 					count++;
 				}
 			}
+
 			if (player.getKey().equals(havingSettebello(playerCollectedCards))) {
 				count++;
 			}
 
+			//setting the score of each player
 			playersScores.put(player.getKey(), count);
 
+			//adding to the score the scopa points if any
 			if (playerCollectedScopa.get(player.getKey()) != null) {
 				playersScores.put(player.getKey(), count + playerCollectedScopa.get(player.getKey()));
 			}
 		}
+		//bestCountPlayers.stream().forEach(p -> System.out.println(p + " got 1 point for having collected the most cards."));
+		//mostDenierCountPlayers.stream().forEach(p -> System.out.println(p + " got 1 point for having collected the most cards of diamond."));
+
 
 		return playersScores;
 	}
@@ -491,7 +468,6 @@ public abstract class ScopaEngine {
 				bestPlayers.add(player);
 			}
 		}
-
 		return bestPlayers;
 	}
 
@@ -545,6 +521,21 @@ public abstract class ScopaEngine {
 	 * 
 	 */
 	protected abstract void declareWinner(String winner);
+
+	/**
+	 * make sure that at the end of the game all cards are collected (40)
+	 * 
+	 * @throws TotalCollectedCardException
+	 */
+	protected void countTotalCards() throws TotalCollectedCardException{
+		int count = 0;
+		for (String currentPlayer : getInitialPlayers()) {
+			count = count + playerCollectedCards.get(currentPlayer).size();
+		}
+
+		if (count != 40)
+			throw new TotalCollectedCardException(count);
+	}
 
 	/**
 	 * provide the list of the initial players to play the game

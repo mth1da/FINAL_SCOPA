@@ -27,13 +27,8 @@ public class Card {
     public static Card valueOf(String str) {
         CardValue value;
         CardColor color;
-        if (str.length() == 3) {//it's a 10
-            value = CardValue.valueOfStr(str.substring(0, 2));
-            color = CardColor.valueOfStr(str.substring(2, 3));
-        } else {
-            value = CardValue.valueOfStr(str.substring(0, 1));
-            color = CardColor.valueOfStr(str.substring(1, 2));
-        }
+        value = CardValue.valueOfStr(str.substring(0, 1));
+        color = CardColor.valueOfStr(str.substring(1, 2));
         return new Card(color, value);
 
     }
@@ -46,7 +41,7 @@ public class Card {
         if (cards.isEmpty()) {
             return new Card[0];
         }
-        return (Card[]) Arrays.stream(cards.split(";")).map(Card::valueOf).toArray(Card[]::new);
+        return Arrays.stream(cards.split(";")).map(Card::valueOf).toArray(Card[]::new);
     }
 
 

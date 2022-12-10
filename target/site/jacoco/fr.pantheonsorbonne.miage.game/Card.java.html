@@ -27,26 +27,21 @@ public class Card {
     public static Card valueOf(String str) {
         CardValue value;
         CardColor color;
-<span class="nc bnc" id="L30" title="All 2 branches missed.">        if (str.length() == 3) {//it's a 10</span>
-<span class="nc" id="L31">            value = CardValue.valueOfStr(str.substring(0, 2));</span>
-<span class="nc" id="L32">            color = CardColor.valueOfStr(str.substring(2, 3));</span>
-        } else {
-<span class="nc" id="L34">            value = CardValue.valueOfStr(str.substring(0, 1));</span>
-<span class="nc" id="L35">            color = CardColor.valueOfStr(str.substring(1, 2));</span>
-        }
-<span class="nc" id="L37">        return new Card(color, value);</span>
+<span class="fc" id="L30">        value = CardValue.valueOfStr(str.substring(0, 1));</span>
+<span class="fc" id="L31">        color = CardColor.valueOfStr(str.substring(1, 2));</span>
+<span class="fc" id="L32">        return new Card(color, value);</span>
 
     }
 
     public static String cardsToString(Card[] cards) {
-<span class="nc" id="L42">        return Arrays.stream(cards).map(Card::toString).collect(Collectors.joining(&quot;;&quot;));</span>
+<span class="fc" id="L37">        return Arrays.stream(cards).map(Card::toString).collect(Collectors.joining(&quot;;&quot;));</span>
     }
 
     public static Card[] stringToCards(String cards) {
-<span class="nc bnc" id="L46" title="All 2 branches missed.">        if (cards.isEmpty()) {</span>
-<span class="nc" id="L47">            return new Card[0];</span>
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">        if (cards.isEmpty()) {</span>
+<span class="nc" id="L42">            return new Card[0];</span>
         }
-<span class="nc" id="L49">        return (Card[]) Arrays.stream(cards.split(&quot;;&quot;)).map(Card::valueOf).toArray(Card[]::new);</span>
+<span class="fc" id="L44">        return Arrays.stream(cards.split(&quot;;&quot;)).map(Card::valueOf).toArray(Card[]::new);</span>
     }
 
 
@@ -56,21 +51,21 @@ public class Card {
      * @return
      */
     public CardColor getColor() {
-<span class="fc" id="L59">        return color;</span>
+<span class="fc" id="L54">        return color;</span>
     }
 
     @Override
     public String toString() {
-<span class="fc" id="L64">        return this.getValue().getStringRepresentation() + this.getColor().getStringRepresentation();</span>
+<span class="fc" id="L59">        return this.getValue().getStringRepresentation() + this.getColor().getStringRepresentation();</span>
     }
 
     public String toFancyString() {
 
-<span class="nc" id="L69">        int rank = this.getValue().ordinal();</span>
-<span class="nc bnc" id="L70" title="All 2 branches missed.">        if (rank &gt; 6) {</span>
-<span class="nc" id="L71">            rank=rank+4;</span>
+<span class="nc" id="L64">        int rank = this.getValue().ordinal();</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">        if (rank &gt; 6) {</span>
+<span class="nc" id="L66">            rank=rank+4;</span>
         }
-<span class="nc" id="L73">        return new String(Character.toChars(this.color.getCode() + rank));</span>
+<span class="nc" id="L68">        return new String(Character.toChars(this.color.getCode() + rank));</span>
     }
 
     /**
@@ -79,7 +74,7 @@ public class Card {
      * @return
      */
     public CardValue getValue() {
-<span class="fc" id="L82">        return value;</span>
+<span class="fc" id="L77">        return value;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

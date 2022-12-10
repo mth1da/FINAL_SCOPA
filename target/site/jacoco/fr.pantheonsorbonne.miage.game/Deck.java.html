@@ -11,28 +11,28 @@ import java.util.Random;
 public class Deck {
 
     //private final static Random random = new Random();
-<span class="nc" id="L14">    public static int deckSize = CardValue.values().length * CardColor.values().length;</span>
-<span class="nc" id="L15">    private static final Card[] deck = new Card[deckSize];</span>
-<span class="nc" id="L16">    private static Random random=new Random();</span>
+<span class="fc" id="L14">    public static int deckSize = CardValue.values().length * CardColor.values().length;</span>
+<span class="fc" id="L15">    private static final Card[] deck = new Card[deckSize];</span>
+<span class="fc" id="L16">    private static Random random=new Random();</span>
 
     static {
-<span class="nc" id="L19">        int cardCount = deckSize;</span>
+<span class="fc" id="L19">        int cardCount = deckSize;</span>
         //generate all cards
-<span class="nc bnc" id="L21" title="All 2 branches missed.">        for (CardColor color : CardColor.values()) {</span>
-<span class="nc bnc" id="L22" title="All 2 branches missed.">            for (CardValue value : CardValue.values()) {</span>
-<span class="nc" id="L23">                deck[cardCount-- - 1] = new Card(color, value);</span>
+<span class="fc bfc" id="L21" title="All 2 branches covered.">        for (CardColor color : CardColor.values()) {</span>
+<span class="fc bfc" id="L22" title="All 2 branches covered.">            for (CardValue value : CardValue.values()) {</span>
+<span class="fc" id="L23">                deck[cardCount-- - 1] = new Card(color, value);</span>
             }
         }
         //shuffle them
         
-<span class="nc bnc" id="L28" title="All 2 branches missed.">        for (int i = 0; i &lt; deckSize; i++) {</span>
-<span class="nc" id="L29">            int randomIndexToSwap = random.nextInt(deckSize);</span>
-<span class="nc" id="L30">            Card temp = deck[randomIndexToSwap];</span>
-<span class="nc" id="L31">            deck[randomIndexToSwap] = deck[i];</span>
-<span class="nc" id="L32">            deck[i] = temp;</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">        for (int i = 0; i &lt; deckSize; i++) {</span>
+<span class="fc" id="L29">            int randomIndexToSwap = random.nextInt(deckSize);</span>
+<span class="fc" id="L30">            Card temp = deck[randomIndexToSwap];</span>
+<span class="fc" id="L31">            deck[randomIndexToSwap] = deck[i];</span>
+<span class="fc" id="L32">            deck[i] = temp;</span>
 
         }
-<span class="nc" id="L35">    }</span>
+<span class="fc" id="L35">    }</span>
 
     /**
      * disallow instantiation
@@ -49,15 +49,15 @@ public class Deck {
      * @return
      */
     public static Card[] getRandomCards(int length) {
-<span class="nc" id="L52">        Card[] result = new Card[length];</span>
-<span class="nc bnc" id="L53" title="All 2 branches missed.">        for (int i = 0; i &lt; length; i++) {</span>
-<span class="nc" id="L54">            result[i] = newRandomCard();</span>
+<span class="fc" id="L52">        Card[] result = new Card[length];</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        for (int i = 0; i &lt; length; i++) {</span>
+<span class="fc" id="L54">            result[i] = newRandomCard();</span>
         }
-<span class="nc" id="L56">        return result;</span>
+<span class="fc" id="L56">        return result;</span>
     }
 
     private static Card newRandomCard() {
-<span class="nc" id="L60">        return deck[deckSize-- - 1];</span>
+<span class="fc" id="L60">        return deck[deckSize-- - 1];</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

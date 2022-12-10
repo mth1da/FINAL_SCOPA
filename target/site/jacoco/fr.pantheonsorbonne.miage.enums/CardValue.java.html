@@ -21,9 +21,9 @@
 <span class="fc" id="L21">    }</span>
 
     public static CardValue valueOfStr(String str) {
-<span class="nc bnc" id="L24" title="All 2 branches missed.">        for (CardValue value : CardValue.values()) {</span>
-<span class="nc bnc" id="L25" title="All 2 branches missed.">            if (str.equals(value.getStringRepresentation())) {</span>
-<span class="nc" id="L26">                return value;</span>
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">        for (CardValue value : CardValue.values()) {</span>
+<span class="fc bfc" id="L25" title="All 2 branches covered.">            if (str.equals(value.getStringRepresentation())) {</span>
+<span class="fc" id="L26">                return value;</span>
             }
         }
 
