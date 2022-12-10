@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScopaNetworkEngine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">l3-poo-war</a> &gt; <a href="index.source.html" class="el_package">fr.pantheonsorbonne.miage</a> &gt; <span class="el_source">ScopaNetworkEngine.java</span></div><h1>ScopaNetworkEngine.java</h1><pre class="source lang-java linenums">package fr.pantheonsorbonne.miage;
 
-import fr.pantheonsorbonne.miage.Facade;
-import fr.pantheonsorbonne.miage.HostFacade;
+
+import fr.pantheonsorbonne.miage.exception.InvalidStateException;
 import fr.pantheonsorbonne.miage.exception.NoMoreCardException;
 import fr.pantheonsorbonne.miage.exception.NoSuchPlayerException;
 import fr.pantheonsorbonne.miage.exception.TotalCollectedCardException;
@@ -29,7 +29,7 @@ public class ScopaNetworkEngine extends ScopaEngine {
 <span class="nc" id="L29">        this.scopa = scopa;</span>
 <span class="nc" id="L30">    }</span>
 
-    public static void main(String[] args) throws TotalCollectedCardException, NoSuchPlayerException {
+    public static void main(String[] args) throws TotalCollectedCardException, NoSuchPlayerException, InvalidStateException {
         //create the host facade
 <span class="nc" id="L34">        HostFacade hostFacade = Facade.getFacade();</span>
 <span class="nc" id="L35">        hostFacade.waitReady();</span>
@@ -98,8 +98,10 @@ public class ScopaNetworkEngine extends ScopaEngine {
             //give back all the cards for this round to the second players
 <span class="nc" id="L99">            hostFacade.sendGameCommandToPlayer(scopa, cardProviderPlayerOpponent, new GameCommand(CARDSFORYOU, Card.cardsToString(leftOverCard.toArray(new Card[leftOverCard.size()]))));</span>
 <span class="nc" id="L100">            return null;</span>
+<span class="nc" id="L101">        } catch (InvalidStateException e) {</span>
+<span class="nc" id="L102">            return null;</span>
         }
-
+        
     }
 
     /**
@@ -110,40 +112,41 @@ public class ScopaNetworkEngine extends ScopaEngine {
      */
     @Override
     protected void giveCardsToPlayer(Collection&lt;Card&gt; roundStack, String winner) {
-<span class="nc" id="L113">        List&lt;Card&gt; cards = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L114">        cards.addAll(roundStack);</span>
+<span class="nc" id="L115">        List&lt;Card&gt; cards = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L116">        cards.addAll(roundStack);</span>
         //shuffle the round deck so we are not stuck
-<span class="nc" id="L116">        Collections.shuffle(cards);</span>
-<span class="nc" id="L117">        hostFacade.sendGameCommandToPlayer(scopa, winner, new GameCommand(CARDSFORYOU, Card.cardsToString(cards.toArray(new Card[cards.size()]))));</span>
-<span class="nc" id="L118">    }</span>
+<span class="nc" id="L118">        Collections.shuffle(cards);</span>
+<span class="nc" id="L119">        hostFacade.sendGameCommandToPlayer(scopa, winner, new GameCommand(CARDSFORYOU, Card.cardsToString(cards.toArray(new Card[cards.size()]))));</span>
+<span class="nc" id="L120">    }</span>
 
     /**
      * we get a card from a player, if possible.
-     * &lt;p&gt;
+     * 
      * If the player has no more card, throw an exception
      *
      * @param player the name of the player
      * @return a card from a player
      * @throws NoMoreCardException if player has no more card.
+     * @throws InvalidStateException
      */
     @Override
-    protected Card getCardFromPlayer(String player) throws NoMoreCardException {
-<span class="nc" id="L131">        hostFacade.sendGameCommandToPlayer(scopa, player, new GameCommand(&quot;playACard&quot;));</span>
-<span class="nc" id="L132">        GameCommand expectedCard = hostFacade.receiveGameCommand(scopa);</span>
-<span class="nc bnc" id="L133" title="All 2 branches missed.">        if (expectedCard.name().equals(&quot;card&quot;)) {</span>
-<span class="nc" id="L134">            return Card.valueOf(expectedCard.body());</span>
+    protected Card getCardFromPlayer(String player) throws NoMoreCardException, InvalidStateException {
+<span class="nc" id="L134">        hostFacade.sendGameCommandToPlayer(scopa, player, new GameCommand(&quot;playACard&quot;));</span>
+<span class="nc" id="L135">        GameCommand expectedCard = hostFacade.receiveGameCommand(scopa);</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">        if (expectedCard.name().equals(&quot;card&quot;)) {</span>
+<span class="nc" id="L137">            return Card.valueOf(expectedCard.body());</span>
         }
-<span class="nc bnc" id="L136" title="All 2 branches missed.">        if (expectedCard.name().equals(&quot;outOfCard&quot;)) {</span>
-<span class="nc" id="L137">            throw new NoMoreCardException();</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">        if (expectedCard.name().equals(&quot;outOfCard&quot;)) {</span>
+<span class="nc" id="L140">            throw new NoMoreCardException();</span>
         }
         //should not happen!
-<span class="nc" id="L140">        throw new RuntimeException(&quot;invalid state&quot;);</span>
+<span class="nc" id="L143">        throw new InvalidStateException();</span>
 
     }
 
     @Override
     protected Queue&lt;Card&gt; getPlayerCards(String playerName) {
-<span class="nc" id="L146">        return new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L149">        return new LinkedList&lt;&gt;();</span>
     }
 
 	

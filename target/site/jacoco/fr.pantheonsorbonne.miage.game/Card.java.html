@@ -61,11 +61,11 @@ public class Card {
 
     public String toFancyString() {
 
-<span class="nc" id="L64">        int rank = this.getValue().ordinal();</span>
-<span class="nc bnc" id="L65" title="All 2 branches missed.">        if (rank &gt; 6) {</span>
-<span class="nc" id="L66">            rank=rank+4;</span>
+<span class="fc" id="L64">        int rank = this.getValue().ordinal();</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        if (rank &gt; 6) {</span>
+<span class="fc" id="L66">            rank=rank+4;</span>
         }
-<span class="nc" id="L68">        return new String(Character.toChars(this.color.getCode() + rank));</span>
+<span class="fc" id="L68">        return new String(Character.toChars(this.color.getCode() + rank));</span>
     }
 
     /**

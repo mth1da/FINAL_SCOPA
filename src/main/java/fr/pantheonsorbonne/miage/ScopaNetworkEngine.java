@@ -1,7 +1,7 @@
 package fr.pantheonsorbonne.miage;
 
-import fr.pantheonsorbonne.miage.Facade;
-import fr.pantheonsorbonne.miage.HostFacade;
+
+import fr.pantheonsorbonne.miage.exception.InvalidStateException;
 import fr.pantheonsorbonne.miage.exception.NoMoreCardException;
 import fr.pantheonsorbonne.miage.exception.NoSuchPlayerException;
 import fr.pantheonsorbonne.miage.exception.TotalCollectedCardException;
@@ -29,7 +29,7 @@ public class ScopaNetworkEngine extends ScopaEngine {
         this.scopa = scopa;
     }
 
-    public static void main(String[] args) throws TotalCollectedCardException, NoSuchPlayerException {
+    public static void main(String[] args) throws TotalCollectedCardException, NoSuchPlayerException, InvalidStateException {
         //create the host facade
         HostFacade hostFacade = Facade.getFacade();
         hostFacade.waitReady();
@@ -98,8 +98,10 @@ public class ScopaNetworkEngine extends ScopaEngine {
             //give back all the cards for this round to the second players
             hostFacade.sendGameCommandToPlayer(scopa, cardProviderPlayerOpponent, new GameCommand(CARDSFORYOU, Card.cardsToString(leftOverCard.toArray(new Card[leftOverCard.size()]))));
             return null;
+        } catch (InvalidStateException e) {
+            return null;
         }
-
+        
     }
 
     /**
@@ -119,15 +121,16 @@ public class ScopaNetworkEngine extends ScopaEngine {
 
     /**
      * we get a card from a player, if possible.
-     * <p>
+     * 
      * If the player has no more card, throw an exception
      *
      * @param player the name of the player
      * @return a card from a player
      * @throws NoMoreCardException if player has no more card.
+     * @throws InvalidStateException
      */
     @Override
-    protected Card getCardFromPlayer(String player) throws NoMoreCardException {
+    protected Card getCardFromPlayer(String player) throws NoMoreCardException, InvalidStateException {
         hostFacade.sendGameCommandToPlayer(scopa, player, new GameCommand("playACard"));
         GameCommand expectedCard = hostFacade.receiveGameCommand(scopa);
         if (expectedCard.name().equals("card")) {
@@ -137,7 +140,7 @@ public class ScopaNetworkEngine extends ScopaEngine {
             throw new NoMoreCardException();
         }
         //should not happen!
-        throw new RuntimeException("invalid state");
+        throw new InvalidStateException();
 
     }
 

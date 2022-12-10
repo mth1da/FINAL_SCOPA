@@ -20,7 +20,7 @@ import fr.pantheonsorbonne.miage.enums.CardValue;
  */
 public abstract class ScopaEngine {
 
-	public static final int CARDS_IN_HAND_INITIAL_COUNT = 3;
+	public static final int CARDS_IN_HAND = 3;
 	private static final String DENIER = "DIAMOND";
 
 	protected boolean enableTotalCollException=true;
@@ -38,8 +38,9 @@ public abstract class ScopaEngine {
 	}
 	/**
 	 * play a scopa with the provided players
+	 * @throws InvalidStateException
 	 */
-	public String play() throws TotalCollectedCardException, NoSuchPlayerException {
+	public String play() throws TotalCollectedCardException, NoSuchPlayerException, InvalidStateException {
 
 		// send the initial hand to every players
 		giveInitialHandToPLayers();
@@ -49,7 +50,6 @@ public abstract class ScopaEngine {
 
 		// set the initial round deck and make sure there aren't 3 or more cards of the
 		// same value
-		
 		do {
 			roundDeck.addAll(getInitialRoundDeck());
 		} while (checkOverThreeSameCardValue(roundDeck));
@@ -61,8 +61,8 @@ public abstract class ScopaEngine {
 			players.offer(players.poll());
 		}
 
-		// repeat until there are no more cards in deck and until the players don't have
-		// any cards left to play
+		// repeat until there are no more cards in deck 
+		// and until the players don't have any cards left to play
 		while (getDeckSize() > 1 || !noCardsWithPlayers()) {
 
 			// take the first player form the queue
@@ -84,7 +84,7 @@ public abstract class ScopaEngine {
 					processScopaPoint(currentPlayer, roundDeck);
 				} else {
 					try {
-						// apply avoid to put 7D strategy
+						// applying avoid to put 7D strategy
 						Card selectedCard = getCardFromPlayer(currentPlayer);
 						// put the card in the round deck
 						roundDeck.offer(selectedCard);
@@ -93,36 +93,36 @@ public abstract class ScopaEngine {
 					}
 				}
 			} else {
-
-				Card[] cards = getDeckRandomCards(CARDS_IN_HAND_INITIAL_COUNT);
+				// send CARDS_IN_HAND (3) cards to every player
+				Card[] cards = getDeckRandomCards(CARDS_IN_HAND);
 				String hand = Card.cardsToString(cards);
 				giveCardsToPlayer(currentPlayer, hand);
 			}
-			System.out.println("\n");
 
+			// lil display
+			System.out.println("\n");
 		}
 
 		// since we've left the loop, the game is over
 		// we give the remaning cards to the last player having played
 		addRemainingCardsToCollected(roundDeck, players);
-		
 
 		// displaying the collected cards of each player
 		displayPlayerCollectedCards(players);
 
-
+		// making sure all 40 cards have been collected
 		countTotalCards();
-
 		
 		// get the winner & send him the gameover & leave
 		declareWinner(getWinner(playerCollectedCards));
 		return getWinner(playerCollectedCards);
 	}
 
+
 	protected void giveInitialHandToPLayers() {
 		for (String playerName : getInitialPlayers()) {
 			// get random cards
-			Card[] cards = getDeckRandomCards(CARDS_IN_HAND_INITIAL_COUNT);
+			Card[] cards = getDeckRandomCards(CARDS_IN_HAND);
 			// transform them to String
 			String hand = Card.cardsToString(cards); 
 			// send them to this players
@@ -172,7 +172,7 @@ public abstract class ScopaEngine {
 	}
 
 	/*
-	 * displays the player's cards and the round deck 's cards in a fancy way
+	 * displaying the player's cards and the round deck's cards in a fancy way
 	 */
 	protected void displayPlayerRoundDeckCards(String currentPlayer, Queue<Card> roundDeck)
 			throws NoSuchPlayerException {
@@ -328,11 +328,17 @@ public abstract class ScopaEngine {
 		return playerCardDeckCard;
 	}
 
-	/*
+	/**
+	 * after making a pair,
 	 * processing the cards won by the player by adding them to its collected cards
+	 * 
+	 * @param currentPlayer  the current player who made a pair
+	 * @param pairCards the pair of cards made by the current player
+	 * @param roundDeck the current round deck
+	 * @return an updated map of the collected cards
+	 * @throws NoSuchPlayerException
 	 */
-	protected Map<String, Queue<Card>> processPairCards(String currentPlayer, ArrayList<Card> pairCards,
-			Queue<Card> roundDeck)
+	protected Map<String, Queue<Card>> processPairCards(String currentPlayer, ArrayList<Card> pairCards, Queue<Card> roundDeck)
 			throws NoSuchPlayerException {
 		Card selectedCard = pairCards.get(0);
 		playerCollectedCards.get(currentPlayer).offer(selectedCard);
@@ -345,9 +351,14 @@ public abstract class ScopaEngine {
 		return playerCollectedCards;
 	}
 
-	/*
-	 * determining if the player did a scopa and adding a point to its collected
-	 * scopa
+	/**
+	 * after making a pair,
+	 * determining if the player did a scopa (ie if the round deck is empty)
+	 * and if so, adding a point to its collected scopa
+	 * 
+	 * @param currentPlayer the current player who made a pair
+	 * @param roundDeck the current round deck
+	 * @return an updated map of the scopa points
 	 */
 	protected Map<String, Integer> processScopaPoint(String currentPlayer, Queue<Card> roundDeck) {
 		if (roundDeck.isEmpty()) {
@@ -358,8 +369,12 @@ public abstract class ScopaEngine {
 		return playerCollectedScopa;
 	}
 
-	/*
-	 * adding
+	/**
+	 * adding remaining cards of the round deck to the last player having played
+	 * 
+	 * @param roundDeck last cards in the round deck
+	 * @param players queue of all players
+	 * @return an updated map of the collected cards
 	 */
 	protected Map<String, Queue<Card>> addRemainingCardsToCollected(Queue<Card> roundDeck, Queue<String> players) {
 		while (!roundDeck.isEmpty()) {
@@ -532,7 +547,7 @@ public abstract class ScopaEngine {
 	protected abstract void declareWinner(String winner);
 
 	/**
-	 * make sure that at the end of the game all cards are collected (40)
+	 * making sure that all 40 cards are collected at the end of the game
 	 * 
 	 * @throws TotalCollectedCardException
 	 */
@@ -542,10 +557,12 @@ public abstract class ScopaEngine {
 			count = count + playerCollectedCards.get(currentPlayer).size();
 		}
 
-		if (enableTotalCollException && count != 40)
+		if (enableTotalCollException && count != 40){
 			throw new TotalCollectedCardException(count);
+		}
 	}
 
+	
 	/**
 	 * provide the list of the initial players to play the game
 	 *
@@ -573,18 +590,7 @@ public abstract class ScopaEngine {
 	protected abstract Card getCardOrGameOver(Collection<Card> leftOverCard, String cardProviderPlayer,
 			String cardProviderPlayerOpponent);
 
-	// not used for now A SUPPRIMER
-	/*
-	 * protected void getCountPlayersScores(Map<String, Queue<Card>>
-	 * playerCollectedCards) {
-	 * Map<String, Integer> playersScores = countPlayersScores(playerCollectedCards,
-	 * playerCollectedScopa);
-	 * for (Map.Entry<String, Integer> player : playersScores.entrySet()) {
-	 * System.out.println(player.getKey() + " a " + player.getValue() + " points.");
-	 * }
-	 * }
-	 */
-
+	
 	/**
 	 * give some card to a player
 	 *
@@ -599,6 +605,7 @@ public abstract class ScopaEngine {
 	 * @param player the player to give card
 	 * @return the card from the player
 	 * @throws NoMoreCardException if the player does not have a remaining card
+	 * @throws InvalidStateException
 	 */
-	protected abstract Card getCardFromPlayer(String player) throws NoMoreCardException;
+	protected abstract Card getCardFromPlayer(String player) throws NoMoreCardException, InvalidStateException;
 }

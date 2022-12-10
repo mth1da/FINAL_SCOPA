@@ -17,8 +17,8 @@ public class LocalScopa extends ScopaEngine {
     protected Queue&lt;Card&gt; getPlayerCards(String playerName) throws NoSuchPlayerException{
         Queue&lt;Card&gt; playerCard;
 <span class="fc" id="L19">        playerCard=playerCards.get(playerName);</span>
-<span class="pc bpc" id="L20" title="1 of 2 branches missed.">        if (playerCard==null)</span>
-<span class="nc" id="L21">            throw new NoSuchPlayerException(playerName);</span>
+<span class="fc bfc" id="L20" title="All 2 branches covered.">        if (playerCard==null)</span>
+<span class="fc" id="L21">            throw new NoSuchPlayerException(playerName);</span>
 <span class="fc" id="L22">        return playerCard;</span>
     }
     
@@ -88,16 +88,16 @@ public class LocalScopa extends ScopaEngine {
 
     @Override
     protected Card getCardFromPlayer(String player) throws NoMoreCardException {
-<span class="nc bnc" id="L91" title="All 2 branches missed.">        if (this.playerCards.get(player).isEmpty()) {</span>
-<span class="nc" id="L92">            throw new NoMoreCardException();</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        if (this.playerCards.get(player).isEmpty()) {</span>
+<span class="fc" id="L92">            throw new NoMoreCardException();</span>
         } else {
-<span class="nc" id="L94">        	Card card= this.playerCards.get(player).poll();</span>
-<span class="nc bnc" id="L95" title="All 4 branches missed.">        	if (card.toString().equals(&quot;7D&quot;) &amp;&amp; !this.playerCards.get(player).isEmpty()) {</span>
-<span class="nc" id="L96">        			Card secondCard = this.playerCards.get(player).poll();</span>
-<span class="nc" id="L97">        			this.playerCards.get(player).offer(card);</span>
-<span class="nc" id="L98">        			card=secondCard;</span>
+<span class="fc" id="L94">        	Card card= this.playerCards.get(player).poll();</span>
+<span class="fc bfc" id="L95" title="All 4 branches covered.">        	if (card.toString().equals(&quot;7D&quot;) &amp;&amp; !this.playerCards.get(player).isEmpty()) {</span>
+<span class="fc" id="L96">        			Card secondCard = this.playerCards.get(player).poll();</span>
+<span class="fc" id="L97">        			this.playerCards.get(player).offer(card);</span>
+<span class="fc" id="L98">        			card=secondCard;</span>
         	}        	
-<span class="nc" id="L100">            return card;</span>
+<span class="fc" id="L100">            return card;</span>
         }
     }
 

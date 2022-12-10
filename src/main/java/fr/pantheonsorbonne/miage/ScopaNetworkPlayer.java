@@ -1,5 +1,7 @@
 package fr.pantheonsorbonne.miage;
 
+
+import fr.pantheonsorbonne.miage.exception.NoSuchCommandException;
 import fr.pantheonsorbonne.miage.game.Card;
 import fr.pantheonsorbonne.miage.model.Game;
 import fr.pantheonsorbonne.miage.model.GameCommand;
@@ -19,14 +21,15 @@ public class ScopaNetworkPlayer {
     static final PlayerFacade playerFacade = Facade.getFacade();
     static Game scopa;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws NoSuchCommandException {
 
         playerFacade.waitReady();
         playerFacade.createNewPlayer(playerId);
         scopa = playerFacade.autoJoinGame("SCOPA");
-        while (true) {
+        GameCommand command = playerFacade.receiveGameCommand(scopa);
+        while (!command.name().equals("gameOver")) {
 
-            GameCommand command = playerFacade.receiveGameCommand(scopa);
+            
             switch (command.name()) {
                 case "cardsForYou":
                     handleCardsForYou(command);
@@ -38,7 +41,10 @@ public class ScopaNetworkPlayer {
                 case "gameOver":
                     handleGameOverCommand(command);
                     break;
+                default :
+                    throw new NoSuchCommandException(command.name());
 
+                
             }
         }
     }

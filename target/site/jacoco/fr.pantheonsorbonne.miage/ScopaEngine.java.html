@@ -10,8 +10,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import fr.pantheonsorbonne.miage.exception.*;
-
-import fr.pantheonsorbonne.miage.exception.NoMoreCardException;
 import fr.pantheonsorbonne.miage.game.Card;
 import fr.pantheonsorbonne.miage.game.Deck;
 import fr.pantheonsorbonne.miage.enums.CardValue;
@@ -20,123 +18,128 @@ import fr.pantheonsorbonne.miage.enums.CardValue;
  * this class is a abstract version of the engine, to be used locally on through
  * the network
  */
-<span class="fc" id="L23">public abstract class ScopaEngine {</span>
+<span class="fc" id="L21">public abstract class ScopaEngine {</span>
 
-	public static final int CARDS_IN_HAND_INITIAL_COUNT = 3;
+	public static final int CARDS_IN_HAND = 3;
 	private static final String DENIER = &quot;DIAMOND&quot;;
+
+<span class="fc" id="L26">	protected boolean enableTotalCollException=true;</span>
 
 <span class="fc" id="L28">	Map&lt;String, Queue&lt;Card&gt;&gt; playerCollectedCards = new HashMap&lt;&gt;();</span>
 <span class="fc" id="L29">	Map&lt;String, Integer&gt; playerCollectedScopa = new HashMap&lt;&gt;();</span>
 <span class="fc" id="L30">	Queue&lt;Card&gt; roundDeck = new LinkedList&lt;&gt;();</span>
 
+	protected int getDeckSize(){
+<span class="nc" id="L33">		return Deck.deckSize;</span>
+	}
+
+	protected Card[] getDeckRandomCards(int n) {
+<span class="nc" id="L37">		return Deck.getRandomCards(n);</span>
+	}
 	/**
 	 * play a scopa with the provided players
+	 * @throws InvalidStateException
 	 */
-	public void play() throws TotalCollectedCardException, NoSuchPlayerException {
+	public String play() throws TotalCollectedCardException, NoSuchPlayerException, InvalidStateException {
 
 		// send the initial hand to every players
-<span class="nc" id="L38">		giveInitialHandToPLayers();</span>
+<span class="fc" id="L46">		giveInitialHandToPLayers();</span>
 
 		// set the initial collected cards and scopa of each players
-<span class="nc" id="L41">		initCollectedAndScopaCards();</span>
+<span class="fc" id="L49">		initCollectedAndScopaCards();</span>
 
 		// set the initial round deck and make sure there aren't 3 or more cards of the
 		// same value
-		
 		do {
-<span class="nc" id="L47">			roundDeck.addAll(getInitialRoundDeck());</span>
-<span class="nc bnc" id="L48" title="All 2 branches missed.">		} while (checkOverThreeSameCardValue(roundDeck));</span>
+<span class="fc" id="L54">			roundDeck.addAll(getInitialRoundDeck());</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">		} while (checkOverThreeSameCardValue(roundDeck));</span>
 
 		// make a queue with all the players
-<span class="nc" id="L51">		final Queue&lt;String&gt; players = new LinkedList&lt;&gt;();</span>
-<span class="nc" id="L52">		players.addAll(this.getInitialPlayers());</span>
-<span class="nc bnc" id="L53" title="All 2 branches missed.">		for (int i = 0; i &lt; players.size(); i++) {</span>
-<span class="nc" id="L54">			players.offer(players.poll());</span>
+<span class="fc" id="L58">		final Queue&lt;String&gt; players = new LinkedList&lt;&gt;();</span>
+<span class="fc" id="L59">		players.addAll(this.getInitialPlayers());</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">		for (int i = 0; i &lt; players.size(); i++) {</span>
+<span class="fc" id="L61">			players.offer(players.poll());</span>
 		}
 
-		// repeat until there are no more cards in deck and until the players don't have
-		// any cards left to play
-<span class="nc bnc" id="L59" title="All 4 branches missed.">		while (Deck.deckSize &gt; 1 || !noCardsWithPlayers()) {</span>
+		// repeat until there are no more cards in deck 
+		// and until the players don't have any cards left to play
+<span class="fc bfc" id="L66" title="All 4 branches covered.">		while (getDeckSize() &gt; 1 || !noCardsWithPlayers()) {</span>
 
 			// take the first player form the queue
-<span class="nc" id="L62">			String currentPlayer = players.poll();</span>
+<span class="fc" id="L69">			String currentPlayer = players.poll();</span>
 
 			// display each card of all players and of the deck
-<span class="nc" id="L65">			displayPlayerRoundDeckCards(currentPlayer, roundDeck);</span>
+<span class="fc" id="L72">			displayPlayerRoundDeckCards(currentPlayer, roundDeck);</span>
 
 			// and put it immediately at the end
-<span class="nc" id="L68">			players.offer(currentPlayer);</span>
+<span class="fc" id="L75">			players.offer(currentPlayer);</span>
 
-<span class="nc bnc" id="L70" title="All 2 branches missed.">			if (!getPlayerCards(currentPlayer).isEmpty()) {</span>
-<span class="nc" id="L71">				ArrayList&lt;Card&gt; pairCards = makePair(getPlayerCards(currentPlayer), roundDeck);</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">			if (!getPlayerCards(currentPlayer).isEmpty()) {</span>
+<span class="fc" id="L78">				ArrayList&lt;Card&gt; pairCards = makePair(getPlayerCards(currentPlayer), roundDeck);</span>
 				// if a pair is possible,
-<span class="nc bnc" id="L73" title="All 2 branches missed.">				if (!pairCards.isEmpty()) {</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">				if (!pairCards.isEmpty()) {</span>
 					// processing the pair
-<span class="nc" id="L75">					processPairCards(currentPlayer, pairCards, roundDeck);</span>
+<span class="fc" id="L82">					processPairCards(currentPlayer, pairCards, roundDeck);</span>
 					// processing the scopa point if done
-<span class="nc" id="L77">					processScopaPoint(currentPlayer, roundDeck);</span>
+<span class="fc" id="L84">					processScopaPoint(currentPlayer, roundDeck);</span>
 				} else {
 					try {
-						// apply avoid to put 7D strategy
-<span class="nc" id="L81">						Card selectedCard = getCardFromPlayer(currentPlayer);</span>
+						// applying avoid to put 7D strategy
+<span class="fc" id="L88">						Card selectedCard = getCardFromPlayer(currentPlayer);</span>
 						// put the card in the round deck
-<span class="nc" id="L83">						roundDeck.offer(selectedCard);</span>
-<span class="nc" id="L84">					} catch (NoMoreCardException e) {</span>
-<span class="nc" id="L85">						System.out.println(&quot;no more cards&quot;);</span>
-<span class="nc" id="L86">					}</span>
+<span class="fc" id="L90">						roundDeck.offer(selectedCard);</span>
+<span class="nc" id="L91">					} catch (NoMoreCardException e) {</span>
+<span class="nc" id="L92">						System.out.println(&quot;no more cards&quot;);</span>
+<span class="fc" id="L93">					}</span>
 				}
-<span class="nc" id="L88">			} else {</span>
-
-<span class="nc" id="L90">				Card[] cards = Deck.getRandomCards(CARDS_IN_HAND_INITIAL_COUNT);</span>
-<span class="nc" id="L91">				String hand = Card.cardsToString(cards);</span>
-<span class="nc" id="L92">				giveCardsToPlayer(currentPlayer, hand);</span>
+<span class="fc" id="L95">			} else {</span>
+				// send CARDS_IN_HAND (3) cards to every player
+<span class="fc" id="L97">				Card[] cards = getDeckRandomCards(CARDS_IN_HAND);</span>
+<span class="fc" id="L98">				String hand = Card.cardsToString(cards);</span>
+<span class="fc" id="L99">				giveCardsToPlayer(currentPlayer, hand);</span>
 			}
-<span class="nc" id="L94">			System.out.println(&quot;\n&quot;);</span>
 
-<span class="nc" id="L96">		}</span>
+			// lil display
+<span class="fc" id="L103">			System.out.println(&quot;\n&quot;);</span>
+<span class="fc" id="L104">		}</span>
 
 		// since we've left the loop, the game is over
 		// we give the remaning cards to the last player having played
-<span class="nc" id="L100">		addRemainingCardsToCollected(roundDeck, players);</span>
-		
+<span class="fc" id="L108">		addRemainingCardsToCollected(roundDeck, players);</span>
 
 		// displaying the collected cards of each player
-<span class="nc" id="L104">		displayPlayerCollectedCards(players);</span>
+<span class="fc" id="L111">		displayPlayerCollectedCards(players);</span>
 
-<span class="nc" id="L106">		int count = 0;</span>
-<span class="nc bnc" id="L107" title="All 2 branches missed.">		for (String currentPlayer : getInitialPlayers()) {</span>
-<span class="nc" id="L108">			count = count + playerCollectedCards.get(currentPlayer).size();</span>
-<span class="nc" id="L109">		}</span>
-
-<span class="nc bnc" id="L111" title="All 2 branches missed.">		if (count != 40)</span>
-<span class="nc" id="L112">			throw new TotalCollectedCardException(count);</span>
+		// making sure all 40 cards have been collected
+<span class="fc" id="L114">		countTotalCards();</span>
 		
 		// get the winner &amp; send him the gameover &amp; leave
-<span class="nc" id="L115">		declareWinner(getWinner(playerCollectedCards));</span>
-<span class="nc" id="L116">		System.exit(0);</span>
-<span class="nc" id="L117">	}</span>
+<span class="fc" id="L117">		declareWinner(getWinner(playerCollectedCards));</span>
+<span class="fc" id="L118">		return getWinner(playerCollectedCards);</span>
+	}
+
 
 	protected void giveInitialHandToPLayers() {
-<span class="nc bnc" id="L120" title="All 2 branches missed.">		for (String playerName : getInitialPlayers()) {</span>
+<span class="fc bfc" id="L123" title="All 2 branches covered.">		for (String playerName : getInitialPlayers()) {</span>
 			// get random cards
-<span class="nc" id="L122">			Card[] cards = Deck.getRandomCards(CARDS_IN_HAND_INITIAL_COUNT);</span>
+<span class="fc" id="L125">			Card[] cards = getDeckRandomCards(CARDS_IN_HAND);</span>
 			// transform them to String
-<span class="nc" id="L124">			String hand = Card.cardsToString(cards); </span>
+<span class="fc" id="L127">			String hand = Card.cardsToString(cards); </span>
 			// send them to this players
-<span class="nc" id="L126">			giveCardsToPlayer(playerName, hand);</span>
+<span class="fc" id="L129">			giveCardsToPlayer(playerName, hand);</span>
 
-<span class="nc" id="L128">		}</span>
-<span class="nc" id="L129">	}</span>
+<span class="fc" id="L131">		}</span>
+<span class="fc" id="L132">	}</span>
 
 	protected void initCollectedAndScopaCards() {
-<span class="fc bfc" id="L132" title="All 2 branches covered.">		for (String playerName : getInitialPlayers()) {</span>
-<span class="fc" id="L133">			playerCollectedCards.put(playerName, new LinkedList&lt;&gt;());</span>
-<span class="fc" id="L134">			playerCollectedScopa.put(playerName, 0);</span>
-<span class="fc" id="L135">		}</span>
-<span class="fc" id="L136">	}</span>
+<span class="fc bfc" id="L135" title="All 2 branches covered.">		for (String playerName : getInitialPlayers()) {</span>
+<span class="fc" id="L136">			playerCollectedCards.put(playerName, new LinkedList&lt;&gt;());</span>
+<span class="fc" id="L137">			playerCollectedScopa.put(playerName, 0);</span>
+<span class="fc" id="L138">		}</span>
+<span class="fc" id="L139">	}</span>
 
 	protected List&lt;Card&gt; getInitialRoundDeck() {
-<span class="fc" id="L139">		return Arrays.asList(Deck.getRandomCards(4));</span>
+<span class="fc" id="L142">		return Arrays.asList(getDeckRandomCards(4));</span>
 	}
 
 	/**
@@ -145,41 +148,41 @@ import fr.pantheonsorbonne.miage.enums.CardValue;
 	 * @return true if so, false if not
 	 */
 	protected boolean checkOverThreeSameCardValue(Queue&lt;Card&gt; queue) {
-<span class="fc" id="L148">		HashMap&lt;CardValue, Integer&gt; map = new HashMap&lt;&gt;();</span>
-<span class="fc bfc" id="L149" title="All 2 branches covered.">		for (Card card : queue) {</span>
-<span class="fc" id="L150">			CardValue value = card.getValue();</span>
-<span class="fc bfc" id="L151" title="All 2 branches covered.">			if (map.containsKey(value)) {</span>
-<span class="fc" id="L152">				map.put(value, map.get(value) + 1);</span>
-<span class="fc bfc" id="L153" title="All 2 branches covered.">				if (map.get(value) &gt;= 3) {</span>
-<span class="fc" id="L154">					return true;</span>
+<span class="fc" id="L151">		HashMap&lt;CardValue, Integer&gt; map = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L152" title="All 2 branches covered.">		for (Card card : queue) {</span>
+<span class="fc" id="L153">			CardValue value = card.getValue();</span>
+<span class="fc bfc" id="L154" title="All 2 branches covered.">			if (map.containsKey(value)) {</span>
+<span class="fc" id="L155">				map.put(value, map.get(value) + 1);</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">				if (map.get(value) &gt;= 3) {</span>
+<span class="fc" id="L157">					return true;</span>
 				}
 			} else {
-<span class="fc" id="L157">				map.put(value, 1);</span>
+<span class="fc" id="L160">				map.put(value, 1);</span>
 			}
-<span class="fc" id="L159">		}</span>
-<span class="fc" id="L160">		return false;</span>
+<span class="fc" id="L162">		}</span>
+<span class="fc" id="L163">		return false;</span>
 	}
 
 	private boolean noCardsWithPlayers() throws NoSuchPlayerException {
-<span class="nc" id="L164">		int count = 0;</span>
-<span class="nc bnc" id="L165" title="All 2 branches missed.">		for (String player : getInitialPlayers()) {</span>
-<span class="nc" id="L166">			count = count + getPlayerCards(player).size();</span>
-<span class="nc" id="L167">		}</span>
-<span class="nc bnc" id="L168" title="All 2 branches missed.">		return count == 0;</span>
+<span class="fc" id="L167">		int count = 0;</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">		for (String player : getInitialPlayers()) {</span>
+<span class="fc" id="L169">			count = count + getPlayerCards(player).size();</span>
+<span class="fc" id="L170">		}</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">		return count == 0;</span>
 	}
 
 	/*
-	 * displays the player's cards and the round deck 's cards in a fancy way
+	 * displaying the player's cards and the round deck's cards in a fancy way
 	 */
 	protected void displayPlayerRoundDeckCards(String currentPlayer, Queue&lt;Card&gt; roundDeck)
 			throws NoSuchPlayerException {
-<span class="nc" id="L176">		System.out.print(&quot;player &quot; + currentPlayer + &quot;: &quot;);</span>
-<span class="nc" id="L177">		getPlayerCards(currentPlayer).stream().forEach(c -&gt; System.out.print(c.toFancyString()));</span>
-<span class="nc" id="L178">		System.out.println();</span>
-<span class="nc" id="L179">		System.out.print(&quot;RoundDeck: &quot;);</span>
-<span class="nc" id="L180">		roundDeck.stream().forEach(c -&gt; System.out.print(c.toFancyString()));</span>
-<span class="nc" id="L181">		System.out.println();</span>
-<span class="nc" id="L182">	}</span>
+<span class="fc" id="L179">		System.out.print(&quot;player &quot; + currentPlayer + &quot;: &quot;);</span>
+<span class="fc" id="L180">		getPlayerCards(currentPlayer).stream().forEach(c -&gt; System.out.print(c.toFancyString()));</span>
+<span class="fc" id="L181">		System.out.println();</span>
+<span class="fc" id="L182">		System.out.print(&quot;RoundDeck: &quot;);</span>
+<span class="fc" id="L183">		roundDeck.stream().forEach(c -&gt; System.out.print(c.toFancyString()));</span>
+<span class="fc" id="L184">		System.out.println();</span>
+<span class="fc" id="L185">	}</span>
 
 	/**
 	 * get all cards of a player
@@ -195,24 +198,24 @@ import fr.pantheonsorbonne.miage.enums.CardValue;
 	protected ArrayList&lt;Card&gt; makePair(Queue&lt;Card&gt; playerCards, Queue&lt;Card&gt; roundDeck) {
 
 		// applying 7D strategy
-<span class="fc bfc" id="L198" title="All 2 branches covered.">		if (!settebelloInDeckStrategy(playerCards, roundDeck).isEmpty()) {</span>
-<span class="fc" id="L199">			System.out.println(&quot;took the settebello !&quot;);</span>
-<span class="fc" id="L200">			return settebelloInDeckStrategy(playerCards, roundDeck);</span>
-<span class="fc bfc" id="L201" title="All 2 branches covered.">		} else if (!settebelloInHandStrategy(playerCards, roundDeck).isEmpty()) {</span>
+<span class="fc bfc" id="L201" title="All 2 branches covered.">		if (!settebelloInDeckStrategy(playerCards, roundDeck).isEmpty()) {</span>
 <span class="fc" id="L202">			System.out.println(&quot;took the settebello !&quot;);</span>
-<span class="fc" id="L203">			return settebelloInHandStrategy(playerCards, roundDeck);</span>
+<span class="fc" id="L203">			return settebelloInDeckStrategy(playerCards, roundDeck);</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">		} else if (!settebelloInHandStrategy(playerCards, roundDeck).isEmpty()) {</span>
+<span class="fc" id="L205">			System.out.println(&quot;took the settebello !&quot;);</span>
+<span class="fc" id="L206">			return settebelloInHandStrategy(playerCards, roundDeck);</span>
 		}
 
 		// applying denier strategy
-<span class="fc bfc" id="L207" title="All 2 branches covered.">		else if (!denierCardInDeckStrategy(playerCards, roundDeck).isEmpty()) {</span>
-<span class="fc" id="L208">			return denierCardInDeckStrategy(playerCards, roundDeck);</span>
-<span class="fc bfc" id="L209" title="All 2 branches covered.">		} else if (!denierCardInHandStrategy(playerCards, roundDeck).isEmpty()) {</span>
-<span class="fc" id="L210">			return denierCardInHandStrategy(playerCards, roundDeck);</span>
+<span class="fc bfc" id="L210" title="All 2 branches covered.">		else if (!denierCardInDeckStrategy(playerCards, roundDeck).isEmpty()) {</span>
+<span class="fc" id="L211">			return denierCardInDeckStrategy(playerCards, roundDeck);</span>
+<span class="fc bfc" id="L212" title="All 2 branches covered.">		} else if (!denierCardInHandStrategy(playerCards, roundDeck).isEmpty()) {</span>
+<span class="fc" id="L213">			return denierCardInHandStrategy(playerCards, roundDeck);</span>
 		}
 
 		// applying no specific strategy
 		else {
-<span class="fc" id="L215">			return noStrategy(playerCards, roundDeck);</span>
+<span class="fc" id="L218">			return noStrategy(playerCards, roundDeck);</span>
 		}
 
 	}
@@ -223,19 +226,19 @@ import fr.pantheonsorbonne.miage.enums.CardValue;
 	 * the player will make a pair with its 7 to take the settebello
 	 */
 	protected ArrayList&lt;Card&gt; settebelloInDeckStrategy(Queue&lt;Card&gt; playerCards, Queue&lt;Card&gt; roundDeck) {
-<span class="fc" id="L226">		ArrayList&lt;Card&gt; playerCardDeckCard = new ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L227" title="All 2 branches covered.">		for (Card card : roundDeck) {</span>
-<span class="fc bfc" id="L228" title="All 2 branches covered.">			if (card.toString().equals(&quot;7D&quot;)) {</span>
-<span class="fc bfc" id="L229" title="All 2 branches covered.">				for (Card playerCard : playerCards) {</span>
-<span class="fc bfc" id="L230" title="All 2 branches covered.">					if (playerCard.getValue().getStringRepresentation().equals(&quot;7&quot;)) {</span>
-<span class="fc" id="L231">						playerCardDeckCard.add(playerCard);</span>
-<span class="fc" id="L232">						playerCardDeckCard.add(card);</span>
-<span class="fc" id="L233">						return playerCardDeckCard;</span>
+<span class="fc" id="L229">		ArrayList&lt;Card&gt; playerCardDeckCard = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L230" title="All 2 branches covered.">		for (Card card : roundDeck) {</span>
+<span class="fc bfc" id="L231" title="All 2 branches covered.">			if (card.toString().equals(&quot;7D&quot;)) {</span>
+<span class="fc bfc" id="L232" title="All 2 branches covered.">				for (Card playerCard : playerCards) {</span>
+<span class="fc bfc" id="L233" title="All 2 branches covered.">					if (playerCard.getValue().getStringRepresentation().equals(&quot;7&quot;)) {</span>
+<span class="fc" id="L234">						playerCardDeckCard.add(playerCard);</span>
+<span class="fc" id="L235">						playerCardDeckCard.add(card);</span>
+<span class="fc" id="L236">						return playerCardDeckCard;</span>
 					}
-<span class="fc" id="L235">				}</span>
+<span class="fc" id="L238">				}</span>
 			}
-<span class="fc" id="L237">		}</span>
-<span class="fc" id="L238">		return playerCardDeckCard;</span>
+<span class="fc" id="L240">		}</span>
+<span class="fc" id="L241">		return playerCardDeckCard;</span>
 	}
 
 	/*
@@ -245,19 +248,19 @@ import fr.pantheonsorbonne.miage.enums.CardValue;
 	 * by doing such, the player secures the settebello to its collected cards
 	 */
 	protected ArrayList&lt;Card&gt; settebelloInHandStrategy(Queue&lt;Card&gt; playerCards, Queue&lt;Card&gt; roundDeck) {
-<span class="fc" id="L248">		ArrayList&lt;Card&gt; playerCardDeckCard = new ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L249" title="All 2 branches covered.">		for (Card playerCard : playerCards) {</span>
-<span class="fc bfc" id="L250" title="All 2 branches covered.">			if (playerCard.toString().equals(&quot;7D&quot;)) {</span>
-<span class="pc bpc" id="L251" title="1 of 2 branches missed.">				for (Card card : roundDeck) {</span>
-<span class="fc bfc" id="L252" title="All 2 branches covered.">					if (card.getValue().getStringRepresentation().equals(&quot;7&quot;)) {</span>
-<span class="fc" id="L253">						playerCardDeckCard.add(playerCard);</span>
-<span class="fc" id="L254">						playerCardDeckCard.add(card);</span>
-<span class="fc" id="L255">						return playerCardDeckCard;</span>
+<span class="fc" id="L251">		ArrayList&lt;Card&gt; playerCardDeckCard = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L252" title="All 2 branches covered.">		for (Card playerCard : playerCards) {</span>
+<span class="fc bfc" id="L253" title="All 2 branches covered.">			if (playerCard.toString().equals(&quot;7D&quot;)) {</span>
+<span class="pc bpc" id="L254" title="1 of 2 branches missed.">				for (Card card : roundDeck) {</span>
+<span class="fc bfc" id="L255" title="All 2 branches covered.">					if (card.getValue().getStringRepresentation().equals(&quot;7&quot;)) {</span>
+<span class="fc" id="L256">						playerCardDeckCard.add(playerCard);</span>
+<span class="fc" id="L257">						playerCardDeckCard.add(card);</span>
+<span class="fc" id="L258">						return playerCardDeckCard;</span>
 					}
-<span class="fc" id="L257">				}</span>
+<span class="fc" id="L260">				}</span>
 			}
-<span class="fc" id="L259">		}</span>
-<span class="fc" id="L260">		return playerCardDeckCard;</span>
+<span class="fc" id="L262">		}</span>
+<span class="fc" id="L263">		return playerCardDeckCard;</span>
 	}
 
 	/*
@@ -266,20 +269,20 @@ import fr.pantheonsorbonne.miage.enums.CardValue;
 	 * the player will make a pair with this card to take the denier card
 	 */
 	protected ArrayList&lt;Card&gt; denierCardInDeckStrategy(Queue&lt;Card&gt; playerCards, Queue&lt;Card&gt; roundDeck) {
-<span class="fc" id="L269">		ArrayList&lt;Card&gt; playerCardDeckCard = new ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L270" title="All 2 branches covered.">		for (Card card : roundDeck) {</span>
-<span class="fc bfc" id="L271" title="All 2 branches covered.">			if (card.getColor().name().equals(DENIER)) {</span>
-<span class="fc bfc" id="L272" title="All 2 branches covered.">				for (Card playerCard : playerCards) {</span>
-<span class="fc" id="L273">					if (playerCard.getValue().getStringRepresentation()</span>
-<span class="fc bfc" id="L274" title="All 2 branches covered.">							.equals(card.getValue().getStringRepresentation())) {</span>
-<span class="fc" id="L275">						playerCardDeckCard.add(playerCard);</span>
-<span class="fc" id="L276">						playerCardDeckCard.add(card);</span>
-<span class="fc" id="L277">						return playerCardDeckCard;</span>
+<span class="fc" id="L272">		ArrayList&lt;Card&gt; playerCardDeckCard = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L273" title="All 2 branches covered.">		for (Card card : roundDeck) {</span>
+<span class="fc bfc" id="L274" title="All 2 branches covered.">			if (card.getColor().name().equals(DENIER)) {</span>
+<span class="fc bfc" id="L275" title="All 2 branches covered.">				for (Card playerCard : playerCards) {</span>
+<span class="fc" id="L276">					if (playerCard.getValue().getStringRepresentation()</span>
+<span class="fc bfc" id="L277" title="All 2 branches covered.">							.equals(card.getValue().getStringRepresentation())) {</span>
+<span class="fc" id="L278">						playerCardDeckCard.add(playerCard);</span>
+<span class="fc" id="L279">						playerCardDeckCard.add(card);</span>
+<span class="fc" id="L280">						return playerCardDeckCard;</span>
 					}
-<span class="fc" id="L279">				}</span>
+<span class="fc" id="L282">				}</span>
 			}
-<span class="fc" id="L281">		}</span>
-<span class="fc" id="L282">		return playerCardDeckCard;</span>
+<span class="fc" id="L284">		}</span>
+<span class="fc" id="L285">		return playerCardDeckCard;</span>
 	}
 
 	/*
@@ -289,20 +292,20 @@ import fr.pantheonsorbonne.miage.enums.CardValue;
 	 * the player will make a pair with this card to secure its denier card
 	 */
 	protected ArrayList&lt;Card&gt; denierCardInHandStrategy(Queue&lt;Card&gt; playerCards, Queue&lt;Card&gt; roundDeck) {
-<span class="fc" id="L292">		ArrayList&lt;Card&gt; playerCardDeckCard = new ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L293" title="All 2 branches covered.">		for (Card playerCard : playerCards) {</span>
-<span class="fc bfc" id="L294" title="All 2 branches covered.">			if (playerCard.getColor().name().equals(DENIER)) {</span>
-<span class="fc bfc" id="L295" title="All 2 branches covered.">				for (Card card : roundDeck) {</span>
-<span class="fc" id="L296">					if (card.getValue().getStringRepresentation()</span>
-<span class="fc bfc" id="L297" title="All 2 branches covered.">							.equals(playerCard.getValue().getStringRepresentation())) {</span>
-<span class="fc" id="L298">						playerCardDeckCard.add(playerCard);</span>
-<span class="fc" id="L299">						playerCardDeckCard.add(card);</span>
-<span class="fc" id="L300">						return playerCardDeckCard;</span>
+<span class="fc" id="L295">		ArrayList&lt;Card&gt; playerCardDeckCard = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L296" title="All 2 branches covered.">		for (Card playerCard : playerCards) {</span>
+<span class="fc bfc" id="L297" title="All 2 branches covered.">			if (playerCard.getColor().name().equals(DENIER)) {</span>
+<span class="fc bfc" id="L298" title="All 2 branches covered.">				for (Card card : roundDeck) {</span>
+<span class="fc" id="L299">					if (card.getValue().getStringRepresentation()</span>
+<span class="fc bfc" id="L300" title="All 2 branches covered.">							.equals(playerCard.getValue().getStringRepresentation())) {</span>
+<span class="fc" id="L301">						playerCardDeckCard.add(playerCard);</span>
+<span class="fc" id="L302">						playerCardDeckCard.add(card);</span>
+<span class="fc" id="L303">						return playerCardDeckCard;</span>
 					}
-<span class="fc" id="L302">				}</span>
+<span class="fc" id="L305">				}</span>
 			}
-<span class="fc" id="L304">		}</span>
-<span class="fc" id="L305">		return playerCardDeckCard;</span>
+<span class="fc" id="L307">		}</span>
+<span class="fc" id="L308">		return playerCardDeckCard;</span>
 	}
 
 	/*
@@ -311,60 +314,75 @@ import fr.pantheonsorbonne.miage.enums.CardValue;
 	 * the player will make a pair with the first card value in the round deck
 	 */
 	protected ArrayList&lt;Card&gt; noStrategy(Queue&lt;Card&gt; playerCards, Queue&lt;Card&gt; roundDeck) {
-<span class="fc" id="L314">		ArrayList&lt;Card&gt; playerCardDeckCard = new ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L315" title="All 2 branches covered.">		for (Card playerCard : playerCards) {</span>
-<span class="fc bfc" id="L316" title="All 2 branches covered.">			for (Card deckCard : roundDeck) {</span>
-<span class="fc" id="L317">				if (deckCard.getValue().getStringRepresentation()</span>
-<span class="fc bfc" id="L318" title="All 2 branches covered.">						.equals(playerCard.getValue().getStringRepresentation())) {</span>
-<span class="fc" id="L319">					playerCardDeckCard.add(playerCard);</span>
-<span class="fc" id="L320">					playerCardDeckCard.add(deckCard);</span>
-<span class="fc" id="L321">					return playerCardDeckCard;</span>
+<span class="fc" id="L317">		ArrayList&lt;Card&gt; playerCardDeckCard = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L318" title="All 2 branches covered.">		for (Card playerCard : playerCards) {</span>
+<span class="fc bfc" id="L319" title="All 2 branches covered.">			for (Card deckCard : roundDeck) {</span>
+<span class="fc" id="L320">				if (deckCard.getValue().getStringRepresentation()</span>
+<span class="fc bfc" id="L321" title="All 2 branches covered.">						.equals(playerCard.getValue().getStringRepresentation())) {</span>
+<span class="fc" id="L322">					playerCardDeckCard.add(playerCard);</span>
+<span class="fc" id="L323">					playerCardDeckCard.add(deckCard);</span>
+<span class="fc" id="L324">					return playerCardDeckCard;</span>
 				}
-<span class="fc" id="L323">			}</span>
-<span class="fc" id="L324">		}</span>
-<span class="fc" id="L325">		return playerCardDeckCard;</span>
+<span class="fc" id="L326">			}</span>
+<span class="fc" id="L327">		}</span>
+<span class="fc" id="L328">		return playerCardDeckCard;</span>
 	}
 
-	/*
+	/**
+	 * after making a pair,
 	 * processing the cards won by the player by adding them to its collected cards
+	 * 
+	 * @param currentPlayer  the current player who made a pair
+	 * @param pairCards the pair of cards made by the current player
+	 * @param roundDeck the current round deck
+	 * @return an updated map of the collected cards
+	 * @throws NoSuchPlayerException
 	 */
-	protected Map&lt;String, Queue&lt;Card&gt;&gt; processPairCards(String currentPlayer, ArrayList&lt;Card&gt; pairCards,
-			Queue&lt;Card&gt; roundDeck)
+	protected Map&lt;String, Queue&lt;Card&gt;&gt; processPairCards(String currentPlayer, ArrayList&lt;Card&gt; pairCards, Queue&lt;Card&gt; roundDeck)
 			throws NoSuchPlayerException {
-<span class="fc" id="L334">		Card selectedCard = pairCards.get(0);</span>
-<span class="fc" id="L335">		playerCollectedCards.get(currentPlayer).offer(selectedCard);</span>
-<span class="fc" id="L336">		getPlayerCards(currentPlayer).remove(selectedCard);</span>
+<span class="fc" id="L343">		Card selectedCard = pairCards.get(0);</span>
+<span class="fc" id="L344">		playerCollectedCards.get(currentPlayer).offer(selectedCard);</span>
+<span class="fc" id="L345">		getPlayerCards(currentPlayer).remove(selectedCard);</span>
 
-<span class="fc" id="L338">		Card removedCard = pairCards.get(1);</span>
-<span class="fc" id="L339">		playerCollectedCards.get(currentPlayer).offer(removedCard);</span>
-<span class="fc" id="L340">		roundDeck.remove(removedCard);</span>
+<span class="fc" id="L347">		Card removedCard = pairCards.get(1);</span>
+<span class="fc" id="L348">		playerCollectedCards.get(currentPlayer).offer(removedCard);</span>
+<span class="fc" id="L349">		roundDeck.remove(removedCard);</span>
 
-<span class="fc" id="L342">		return playerCollectedCards;</span>
+<span class="fc" id="L351">		return playerCollectedCards;</span>
 	}
 
-	/*
-	 * determining if the player did a scopa and adding a point to its collected
-	 * scopa
+	/**
+	 * after making a pair,
+	 * determining if the player did a scopa (ie if the round deck is empty)
+	 * and if so, adding a point to its collected scopa
+	 * 
+	 * @param currentPlayer the current player who made a pair
+	 * @param roundDeck the current round deck
+	 * @return an updated map of the scopa points
 	 */
 	protected Map&lt;String, Integer&gt; processScopaPoint(String currentPlayer, Queue&lt;Card&gt; roundDeck) {
-<span class="fc bfc" id="L350" title="All 2 branches covered.">		if (roundDeck.isEmpty()) {</span>
-<span class="fc" id="L351">			int counter = playerCollectedScopa.get(currentPlayer) + 1;</span>
-<span class="fc" id="L352">			playerCollectedScopa.put(currentPlayer, counter);</span>
-<span class="fc" id="L353">			System.out.println(&quot; made a scopa !&quot;);</span>
+<span class="fc bfc" id="L364" title="All 2 branches covered.">		if (roundDeck.isEmpty()) {</span>
+<span class="fc" id="L365">			int counter = playerCollectedScopa.get(currentPlayer) + 1;</span>
+<span class="fc" id="L366">			playerCollectedScopa.put(currentPlayer, counter);</span>
+<span class="fc" id="L367">			System.out.println(&quot; made a scopa !&quot;);</span>
 		}
-<span class="fc" id="L355">		return playerCollectedScopa;</span>
+<span class="fc" id="L369">		return playerCollectedScopa;</span>
 	}
 
-	/*
-	 * adding
+	/**
+	 * adding remaining cards of the round deck to the last player having played
+	 * 
+	 * @param roundDeck last cards in the round deck
+	 * @param players queue of all players
+	 * @return an updated map of the collected cards
 	 */
 	protected Map&lt;String, Queue&lt;Card&gt;&gt; addRemainingCardsToCollected(Queue&lt;Card&gt; roundDeck, Queue&lt;String&gt; players) {
-<span class="fc bfc" id="L362" title="All 2 branches covered.">		while (!roundDeck.isEmpty()) {</span>
-<span class="fc" id="L363">			String currentPlayer = players.poll();</span>
-<span class="fc" id="L364">			playerCollectedCards.get(currentPlayer).offer(roundDeck.poll());</span>
-<span class="fc" id="L365">			players.offer(currentPlayer);</span>
-<span class="fc" id="L366">		}</span>
-<span class="fc" id="L367">		return playerCollectedCards;</span>
+<span class="fc bfc" id="L380" title="All 2 branches covered.">		while (!roundDeck.isEmpty()) {</span>
+<span class="fc" id="L381">			String currentPlayer = players.poll();</span>
+<span class="fc" id="L382">			playerCollectedCards.get(currentPlayer).offer(roundDeck.poll());</span>
+<span class="fc" id="L383">			players.offer(currentPlayer);</span>
+<span class="fc" id="L384">		}</span>
+<span class="fc" id="L385">		return playerCollectedCards;</span>
 	}
 
 	/**
@@ -373,14 +391,14 @@ import fr.pantheonsorbonne.miage.enums.CardValue;
 	 * @param players
 	 */
 	protected void displayPlayerCollectedCards(Queue&lt;String&gt; players) {
-<span class="nc" id="L376">		System.out.println(&quot;Collected Cards&quot;);</span>
-<span class="nc bnc" id="L377" title="All 2 branches missed.">		for (String currentPlayer : players) {</span>
-<span class="nc" id="L378">			System.out.print(&quot;player &quot; + currentPlayer + &quot;: &quot;);</span>
-<span class="nc" id="L379">			playerCollectedCards.get(currentPlayer).stream().forEach(c -&gt; System.out.print(c.toFancyString()));</span>
-<span class="nc" id="L380">			System.out.println();</span>
-<span class="nc" id="L381">		}</span>
-<span class="nc" id="L382">		System.out.println(&quot;\n&quot;);</span>
-<span class="nc" id="L383">	}</span>
+<span class="fc" id="L394">		System.out.println(&quot;Collected Cards&quot;);</span>
+<span class="fc bfc" id="L395" title="All 2 branches covered.">		for (String currentPlayer : players) {</span>
+<span class="fc" id="L396">			System.out.print(&quot;player &quot; + currentPlayer + &quot;: &quot;);</span>
+<span class="fc" id="L397">			playerCollectedCards.get(currentPlayer).stream().forEach(c -&gt; System.out.print(c.toFancyString()));</span>
+<span class="fc" id="L398">			System.out.println();</span>
+<span class="fc" id="L399">		}</span>
+<span class="fc" id="L400">		System.out.println(&quot;\n&quot;);</span>
+<span class="fc" id="L401">	}</span>
 
 	/**
 	 * give the winner of the game
@@ -389,20 +407,20 @@ import fr.pantheonsorbonne.miage.enums.CardValue;
 	 * @return the name of the winner or nobody if it's a tie
 	 */
 	protected String getWinner(Map&lt;String, Queue&lt;Card&gt;&gt; playerCollectedCards) {
-<span class="fc" id="L392">		int maxCount = 0;</span>
-<span class="fc" id="L393">		String winner = &quot;&quot;;</span>
+<span class="fc" id="L410">		int maxCount = 0;</span>
+<span class="fc" id="L411">		String winner = &quot;&quot;;</span>
 		// count the
-<span class="fc" id="L395">		Map&lt;String, Integer&gt; playersScores = countPlayersScores(playerCollectedCards, playerCollectedScopa);</span>
-<span class="fc bfc" id="L396" title="All 2 branches covered.">		for (Map.Entry&lt;String, Integer&gt; player : playersScores.entrySet()) {</span>
-<span class="fc" id="L397">			System.out.println(player.getKey() + &quot; a &quot; + player.getValue() + &quot; points.&quot;);</span>
-<span class="fc bfc" id="L398" title="All 2 branches covered.">			if (player.getValue() &gt; maxCount) {</span>
-<span class="fc" id="L399">				maxCount = player.getValue();</span>
-<span class="fc" id="L400">				winner = player.getKey();</span>
-<span class="fc bfc" id="L401" title="All 2 branches covered.">			} else if (player.getValue() == maxCount) {</span>
-<span class="fc" id="L402">				winner = &quot;nobody&quot;;</span>
+<span class="fc" id="L413">		Map&lt;String, Integer&gt; playersScores = countPlayersScores(playerCollectedCards, playerCollectedScopa);</span>
+<span class="fc bfc" id="L414" title="All 2 branches covered.">		for (Map.Entry&lt;String, Integer&gt; player : playersScores.entrySet()) {</span>
+<span class="fc" id="L415">			System.out.println(player.getKey() + &quot; has &quot; + player.getValue() + &quot; points.&quot;);</span>
+<span class="fc bfc" id="L416" title="All 2 branches covered.">			if (player.getValue() &gt; maxCount) {</span>
+<span class="fc" id="L417">				maxCount = player.getValue();</span>
+<span class="fc" id="L418">				winner = player.getKey();</span>
+<span class="fc bfc" id="L419" title="All 2 branches covered.">			} else if (player.getValue() == maxCount) {</span>
+<span class="fc" id="L420">				winner = &quot;nobody&quot;;</span>
 			}
-<span class="fc" id="L404">		}</span>
-<span class="fc" id="L405">		return winner;</span>
+<span class="fc" id="L422">		}</span>
+<span class="fc" id="L423">		return winner;</span>
 	}
 
 	/**
@@ -414,42 +432,42 @@ import fr.pantheonsorbonne.miage.enums.CardValue;
 	protected Map&lt;String, Integer&gt; countPlayersScores(Map&lt;String, Queue&lt;Card&gt;&gt; playerCollectedCards,
 			Map&lt;String, Integer&gt; playerCollectedScopa) {
 
-<span class="fc" id="L417">		Map&lt;String, Integer&gt; playersScores = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L418">		ArrayList&lt;String&gt; bestCountPlayers = bestCount(playerCollectedCards);</span>
-<span class="fc" id="L419">		ArrayList&lt;String&gt; mostDenierCountPlayers = mostDenierCount(playerCollectedCards);</span>
+<span class="fc" id="L435">		Map&lt;String, Integer&gt; playersScores = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L436">		ArrayList&lt;String&gt; bestCountPlayers = bestCount(playerCollectedCards);</span>
+<span class="fc" id="L437">		ArrayList&lt;String&gt; mostDenierCountPlayers = mostDenierCount(playerCollectedCards);</span>
 
-<span class="fc bfc" id="L421" title="All 2 branches covered.">		for (Map.Entry&lt;String, Queue&lt;Card&gt;&gt; player : playerCollectedCards.entrySet()) {</span>
-<span class="fc" id="L422">			int count = 0;</span>
+<span class="fc bfc" id="L439" title="All 2 branches covered.">		for (Map.Entry&lt;String, Queue&lt;Card&gt;&gt; player : playerCollectedCards.entrySet()) {</span>
+<span class="fc" id="L440">			int count = 0;</span>
 			
-<span class="fc bfc" id="L424" title="All 2 branches covered.">			for (String joueur : bestCountPlayers) {</span>
-<span class="fc bfc" id="L425" title="All 2 branches covered.">				if (player.getKey().equals(joueur)) {</span>
-<span class="fc" id="L426">					count++;</span>
+<span class="fc bfc" id="L442" title="All 2 branches covered.">			for (String joueur : bestCountPlayers) {</span>
+<span class="fc bfc" id="L443" title="All 2 branches covered.">				if (player.getKey().equals(joueur)) {</span>
+<span class="fc" id="L444">					count++;</span>
 				}
-<span class="fc" id="L428">			}</span>
+<span class="fc" id="L446">			}</span>
 			
-<span class="fc bfc" id="L430" title="All 2 branches covered.">			for (String joueur : mostDenierCountPlayers) {</span>
-<span class="fc bfc" id="L431" title="All 2 branches covered.">				if (player.getKey().equals(joueur)) {</span>
-<span class="fc" id="L432">					count++;</span>
+<span class="fc bfc" id="L448" title="All 2 branches covered.">			for (String joueur : mostDenierCountPlayers) {</span>
+<span class="fc bfc" id="L449" title="All 2 branches covered.">				if (player.getKey().equals(joueur)) {</span>
+<span class="fc" id="L450">					count++;</span>
 				}
-<span class="fc" id="L434">			}</span>
+<span class="fc" id="L452">			}</span>
 
-<span class="fc bfc" id="L436" title="All 2 branches covered.">			if (player.getKey().equals(havingSettebello(playerCollectedCards))) {</span>
-<span class="fc" id="L437">				count++;</span>
+<span class="fc bfc" id="L454" title="All 2 branches covered.">			if (player.getKey().equals(havingSettebello(playerCollectedCards))) {</span>
+<span class="fc" id="L455">				count++;</span>
 			}
 
 			//setting the score of each player
-<span class="fc" id="L441">			playersScores.put(player.getKey(), count);</span>
+<span class="fc" id="L459">			playersScores.put(player.getKey(), count);</span>
 
 			//adding to the score the scopa points if any
-<span class="fc bfc" id="L444" title="All 2 branches covered.">			if (playerCollectedScopa.get(player.getKey()) != null) {</span>
-<span class="fc" id="L445">				playersScores.put(player.getKey(), count + playerCollectedScopa.get(player.getKey()));</span>
+<span class="fc bfc" id="L462" title="All 2 branches covered.">			if (playerCollectedScopa.get(player.getKey()) != null) {</span>
+<span class="fc" id="L463">				playersScores.put(player.getKey(), count + playerCollectedScopa.get(player.getKey()));</span>
 			}
-<span class="fc" id="L447">		}</span>
+<span class="fc" id="L465">		}</span>
 		//bestCountPlayers.stream().forEach(p -&gt; System.out.println(p + &quot; got 1 point for having collected the most cards.&quot;));
 		//mostDenierCountPlayers.stream().forEach(p -&gt; System.out.println(p + &quot; got 1 point for having collected the most cards of diamond.&quot;));
 
 
-<span class="fc" id="L452">		return playersScores;</span>
+<span class="fc" id="L470">		return playersScores;</span>
 	}
 
 	/**
@@ -461,20 +479,20 @@ import fr.pantheonsorbonne.miage.enums.CardValue;
 	 */
 	ArrayList&lt;String&gt; bestCount(Map&lt;String, Queue&lt;Card&gt;&gt; playerCollectedCards) {
 		// determining the highest number of cards collected by a player
-<span class="fc" id="L464">		int maxcount = 0;</span>
-<span class="fc bfc" id="L465" title="All 2 branches covered.">		for (String player : playerCollectedCards.keySet()) {</span>
-<span class="fc bfc" id="L466" title="All 2 branches covered.">			if (playerCollectedCards.get(player).size() &gt; maxcount) {</span>
-<span class="fc" id="L467">				maxcount = playerCollectedCards.get(player).size();</span>
+<span class="fc" id="L482">		int maxcount = 0;</span>
+<span class="fc bfc" id="L483" title="All 2 branches covered.">		for (String player : playerCollectedCards.keySet()) {</span>
+<span class="fc bfc" id="L484" title="All 2 branches covered.">			if (playerCollectedCards.get(player).size() &gt; maxcount) {</span>
+<span class="fc" id="L485">				maxcount = playerCollectedCards.get(player).size();</span>
 			}
-<span class="fc" id="L469">		}</span>
+<span class="fc" id="L487">		}</span>
 		// setting the best players[s] thanks to the maxcount
-<span class="fc" id="L471">		ArrayList&lt;String&gt; bestPlayers = new ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L472" title="All 2 branches covered.">		for (String player : playerCollectedCards.keySet()) {</span>
-<span class="fc bfc" id="L473" title="All 2 branches covered.">			if (playerCollectedCards.get(player).size() == maxcount) {</span>
-<span class="fc" id="L474">				bestPlayers.add(player);</span>
+<span class="fc" id="L489">		ArrayList&lt;String&gt; bestPlayers = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L490" title="All 2 branches covered.">		for (String player : playerCollectedCards.keySet()) {</span>
+<span class="fc bfc" id="L491" title="All 2 branches covered.">			if (playerCollectedCards.get(player).size() == maxcount) {</span>
+<span class="fc" id="L492">				bestPlayers.add(player);</span>
 			}
-<span class="fc" id="L476">		}</span>
-<span class="fc" id="L477">		return bestPlayers;</span>
+<span class="fc" id="L494">		}</span>
+<span class="fc" id="L495">		return bestPlayers;</span>
 	}
 
 	/**
@@ -485,22 +503,22 @@ import fr.pantheonsorbonne.miage.enums.CardValue;
 	 * @return the player having the most cards of deniers
 	 */
 	ArrayList&lt;String&gt; mostDenierCount(Map&lt;String, Queue&lt;Card&gt;&gt; playerCollectedCards) {
-<span class="fc" id="L488">		long maxcount = 0;</span>
-<span class="fc" id="L489">		ArrayList&lt;String&gt; bestPlayers = new ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L490" title="All 2 branches covered.">		for (String player : playerCollectedCards.keySet()) {</span>
-<span class="fc" id="L491">			long counter = playerCollectedCards.get(player).stream()</span>
-<span class="fc" id="L492">					.filter(card -&gt; card.getColor().name().equals(DENIER)).count();</span>
-<span class="fc bfc" id="L493" title="All 2 branches covered.">			if (counter &gt; maxcount) {</span>
-<span class="fc" id="L494">				maxcount = counter;</span>
+<span class="fc" id="L506">		long maxcount = 0;</span>
+<span class="fc" id="L507">		ArrayList&lt;String&gt; bestPlayers = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L508" title="All 2 branches covered.">		for (String player : playerCollectedCards.keySet()) {</span>
+<span class="fc" id="L509">			long counter = playerCollectedCards.get(player).stream()</span>
+<span class="fc" id="L510">					.filter(card -&gt; card.getColor().name().equals(DENIER)).count();</span>
+<span class="fc bfc" id="L511" title="All 2 branches covered.">			if (counter &gt; maxcount) {</span>
+<span class="fc" id="L512">				maxcount = counter;</span>
 			}
-<span class="fc" id="L496">		}</span>
-<span class="fc bfc" id="L497" title="All 2 branches covered.">		for (String player : playerCollectedCards.keySet()) {</span>
-<span class="fc" id="L498">			if (playerCollectedCards.get(player).stream()</span>
-<span class="fc bfc" id="L499" title="All 2 branches covered.">					.filter(card -&gt; card.getColor().name().equals(DENIER)).count() == maxcount) {</span>
-<span class="fc" id="L500">				bestPlayers.add(player);</span>
+<span class="fc" id="L514">		}</span>
+<span class="fc bfc" id="L515" title="All 2 branches covered.">		for (String player : playerCollectedCards.keySet()) {</span>
+<span class="fc" id="L516">			if (playerCollectedCards.get(player).stream()</span>
+<span class="fc bfc" id="L517" title="All 2 branches covered.">					.filter(card -&gt; card.getColor().name().equals(DENIER)).count() == maxcount) {</span>
+<span class="fc" id="L518">				bestPlayers.add(player);</span>
 			}
-<span class="fc" id="L502">		}</span>
-<span class="fc" id="L503">		return bestPlayers;</span>
+<span class="fc" id="L520">		}</span>
+<span class="fc" id="L521">		return bestPlayers;</span>
 	}
 
 	/**
@@ -511,12 +529,12 @@ import fr.pantheonsorbonne.miage.enums.CardValue;
 	 * @return the player having the settebello
 	 */
 	String havingSettebello(Map&lt;String, Queue&lt;Card&gt;&gt; playerCollectedCards) {
-<span class="fc bfc" id="L514" title="All 2 branches covered.">		for (String player : playerCollectedCards.keySet()) {</span>
-<span class="fc bfc" id="L515" title="All 2 branches covered.">			if (playerCollectedCards.get(player).stream().filter(card -&gt; card.toString().equals(&quot;7D&quot;)).count() &gt; 0) {</span>
-<span class="fc" id="L516">				return player;</span>
+<span class="fc bfc" id="L532" title="All 2 branches covered.">		for (String player : playerCollectedCards.keySet()) {</span>
+<span class="fc bfc" id="L533" title="All 2 branches covered.">			if (playerCollectedCards.get(player).stream().filter(card -&gt; card.toString().equals(&quot;7D&quot;)).count() &gt; 0) {</span>
+<span class="fc" id="L534">				return player;</span>
 			}
-<span class="fc" id="L518">		}</span>
-<span class="fc" id="L519">		return null;</span>
+<span class="fc" id="L536">		}</span>
+<span class="fc" id="L537">		return null;</span>
 	}
 
 	/**
@@ -528,6 +546,23 @@ import fr.pantheonsorbonne.miage.enums.CardValue;
 	 */
 	protected abstract void declareWinner(String winner);
 
+	/**
+	 * making sure that all 40 cards are collected at the end of the game
+	 * 
+	 * @throws TotalCollectedCardException
+	 */
+	protected void countTotalCards() throws TotalCollectedCardException{
+<span class="fc" id="L555">		int count = 0;</span>
+<span class="fc bfc" id="L556" title="All 2 branches covered.">		for (String currentPlayer : getInitialPlayers()) {</span>
+<span class="fc" id="L557">			count = count + playerCollectedCards.get(currentPlayer).size();</span>
+<span class="fc" id="L558">		}</span>
+
+<span class="pc bpc" id="L560" title="3 of 4 branches missed.">		if (enableTotalCollException &amp;&amp; count != 40){</span>
+<span class="nc" id="L561">			throw new TotalCollectedCardException(count);</span>
+		}
+<span class="fc" id="L563">	}</span>
+
+	
 	/**
 	 * provide the list of the initial players to play the game
 	 *
@@ -555,18 +590,7 @@ import fr.pantheonsorbonne.miage.enums.CardValue;
 	protected abstract Card getCardOrGameOver(Collection&lt;Card&gt; leftOverCard, String cardProviderPlayer,
 			String cardProviderPlayerOpponent);
 
-	// not used for now A SUPPRIMER
-	/*
-	 * protected void getCountPlayersScores(Map&lt;String, Queue&lt;Card&gt;&gt;
-	 * playerCollectedCards) {
-	 * Map&lt;String, Integer&gt; playersScores = countPlayersScores(playerCollectedCards,
-	 * playerCollectedScopa);
-	 * for (Map.Entry&lt;String, Integer&gt; player : playersScores.entrySet()) {
-	 * System.out.println(player.getKey() + &quot; a &quot; + player.getValue() + &quot; points.&quot;);
-	 * }
-	 * }
-	 */
-
+	
 	/**
 	 * give some card to a player
 	 *
@@ -581,7 +605,8 @@ import fr.pantheonsorbonne.miage.enums.CardValue;
 	 * @param player the player to give card
 	 * @return the card from the player
 	 * @throws NoMoreCardException if the player does not have a remaining card
+	 * @throws InvalidStateException
 	 */
-	protected abstract Card getCardFromPlayer(String player) throws NoMoreCardException;
+	protected abstract Card getCardFromPlayer(String player) throws NoMoreCardException, InvalidStateException;
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

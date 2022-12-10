@@ -1,11 +1,13 @@
+C:\Users\mathi\OneDrive\Documenti\cours_L3\poo\FINAL_SCOPA\src\main\java\fr\pantheonsorbonne\miage\exception\NoSuchCommandException.java
 C:\Users\mathi\OneDrive\Documenti\cours_L3\poo\FINAL_SCOPA\src\main\java\fr\pantheonsorbonne\miage\game\Deck.java
+C:\Users\mathi\OneDrive\Documenti\cours_L3\poo\FINAL_SCOPA\src\main\java\fr\pantheonsorbonne\miage\exception\InvalidStateException.java
+C:\Users\mathi\OneDrive\Documenti\cours_L3\poo\FINAL_SCOPA\src\main\java\fr\pantheonsorbonne\miage\enums\CardColor.java
+C:\Users\mathi\OneDrive\Documenti\cours_L3\poo\FINAL_SCOPA\src\main\java\fr\pantheonsorbonne\miage\ScopaNetworkPlayer.java
+C:\Users\mathi\OneDrive\Documenti\cours_L3\poo\FINAL_SCOPA\src\main\java\fr\pantheonsorbonne\miage\game\Card.java
+C:\Users\mathi\OneDrive\Documenti\cours_L3\poo\FINAL_SCOPA\src\main\java\fr\pantheonsorbonne\miage\ScopaEngine.java
 C:\Users\mathi\OneDrive\Documenti\cours_L3\poo\FINAL_SCOPA\src\main\java\fr\pantheonsorbonne\miage\LocalScopa.java
 C:\Users\mathi\OneDrive\Documenti\cours_L3\poo\FINAL_SCOPA\src\main\java\fr\pantheonsorbonne\miage\exception\NoSuchPlayerException.java
-C:\Users\mathi\OneDrive\Documenti\cours_L3\poo\FINAL_SCOPA\src\main\java\fr\pantheonsorbonne\miage\enums\CardColor.java
 C:\Users\mathi\OneDrive\Documenti\cours_L3\poo\FINAL_SCOPA\src\main\java\fr\pantheonsorbonne\miage\exception\NoMoreCardException.java
 C:\Users\mathi\OneDrive\Documenti\cours_L3\poo\FINAL_SCOPA\src\main\java\fr\pantheonsorbonne\miage\exception\TotalCollectedCardException.java
 C:\Users\mathi\OneDrive\Documenti\cours_L3\poo\FINAL_SCOPA\src\main\java\fr\pantheonsorbonne\miage\ScopaNetworkEngine.java
-C:\Users\mathi\OneDrive\Documenti\cours_L3\poo\FINAL_SCOPA\src\main\java\fr\pantheonsorbonne\miage\ScopaNetworkPlayer.java
 C:\Users\mathi\OneDrive\Documenti\cours_L3\poo\FINAL_SCOPA\src\main\java\fr\pantheonsorbonne\miage\enums\CardValue.java
-C:\Users\mathi\OneDrive\Documenti\cours_L3\poo\FINAL_SCOPA\src\main\java\fr\pantheonsorbonne\miage\game\Card.java
-C:\Users\mathi\OneDrive\Documenti\cours_L3\poo\FINAL_SCOPA\src\main\java\fr\pantheonsorbonne\miage\ScopaEngine.java

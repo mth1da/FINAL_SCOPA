@@ -10,7 +10,6 @@ import fr.pantheonsorbonne.miage.enums.CardColor;
 import fr.pantheonsorbonne.miage.enums.CardValue;
 import fr.pantheonsorbonne.miage.exception.NoMoreCardException;
 import fr.pantheonsorbonne.miage.exception.NoSuchPlayerException;
-import fr.pantheonsorbonne.miage.exception.TotalCollectedCardException;
 import fr.pantheonsorbonne.miage.game.Card;
 import fr.pantheonsorbonne.miage.game.Deck;
 
@@ -29,7 +28,7 @@ class EngineTest extends LocalScopa {
     boolean activateSpecialDeck = false;
 
     public EngineTest() {
-        super(Set.of("Joueur1", "Joueur2", "Joueur3"));
+        super(Set.of("Joueur1"));
     }
 
     protected int getDeckSize() {
@@ -46,14 +45,14 @@ class EngineTest extends LocalScopa {
             return getSpecialDeckRandomCards(n);
     }
 
+    /*
+     * tests on the initial round deck
+     */
     @Test
     void getInitialRoundDeckTest() {
         assertEquals(4, getInitialRoundDeck().size());
     }
 
-    /*
-     * tests on the initial round deck
-     */
     @Test
     void checkGameResetIfThreeSameCardValue() {
 
@@ -102,8 +101,12 @@ class EngineTest extends LocalScopa {
         assertEquals(false, test.checkOverThreeSameCardValue(initialRoundDeckTest));
     }
 
+
+    /*
+     * tests on cards & players
+     */
     @Test
-    void giveCardsToPlayer() {
+    void giveCardsToPlayerTest() {
         var test = new LocalScopa(Set.of("Joueur1"));
         playerCardsTest.add(new Card(CardColor.CLUB, CardValue.THREE));
         test.giveCardsToPlayer("Joueur1", "3C");
@@ -111,22 +114,43 @@ class EngineTest extends LocalScopa {
         assertTrue(result);
     }
 
-    /*
-     * @Test
-     * void getCardFromPlayerTest throws NoMoreCardException(){
-     * var test = new LocalScopa(Set.of("Joueur1"));
-     * playerCardsTest.add(new Card(CardColor.CLUB, CardValue.THREE));
-     * 
-     * assertEquals("3C",test.getCardFromPlayer("Joueur1"));
-     * }
-     */
-
-    /*
-     * 
-     */
-    void noCardsWithPlayersTest() {
-
+    @Test
+    void getPlayerCardsTest(){
+        var test = new LocalScopa(Set.of("Joueur1"));
+        try{
+            assertEquals("3C",test.getPlayerCards("Joueur3").toString());
+        }
+        catch (Exception e) {
+            assertTrue(true,e.toString());
+        }
     }
+
+    @Test
+    void getCardFromPlayerTest() throws NoMoreCardException{
+        {
+            var test = new LocalScopa(Set.of("Joueur1"));
+            test.giveCardsToPlayer("Joueur1", "7D");
+            test.giveCardsToPlayer("Joueur1", "3C");
+            assertEquals("3C",test.getCardFromPlayer("Joueur1").toString());
+            
+        }
+        {
+            var test = new LocalScopa(Set.of("Joueur2"));
+            test.giveCardsToPlayer("Joueur2", "7D");
+            assertEquals("7D",test.getCardFromPlayer("Joueur2").toString());
+            
+        }
+        {
+            var test = new LocalScopa(Set.of("Joueur3"));
+            try{
+                assertEquals("3C",test.getCardFromPlayer("Joueur3").toString());
+            }
+            catch (Exception e) {
+                assertTrue(true,e.toString());
+            }
+        }
+    }
+    
 
     /*
      * tests on making a pair
@@ -888,42 +912,6 @@ class EngineTest extends LocalScopa {
         test.declareWinner("Joueur1");
     }
 
-    /*
-     * @Test
-     * void playTest() throws TotalCollectedCardException, NoSuchPlayerException{
-     * var test = new LocalScopa(Set.of("Joueur1", "Joueur2", "Joueur3"));
-     * test.play();
-     * }
-     */
-/* 
-    @Override
-    protected Queue<Card> getPlayerCards(String playerName) throws NoSuchPlayerException {
-        return null;
-    }
-
-    @Override
-    protected void declareWinner(String winner) {
-    }
-
-    @Override
-    protected void giveCardsToPlayer(String playerName, String hand) {
-    }
-
-    @Override
-    protected Card getCardOrGameOver(Collection<Card> leftOverCard, String cardProviderPlayer,
-            String cardProviderPlayerOpponent) {
-        return null;
-    }
-
-    @Override
-    protected void giveCardsToPlayer(Collection<Card> cards, String playerName) {
-    }
-
-    @Override
-    protected Card getCardFromPlayer(String player) throws NoMoreCardException {
-        return null;
-    }
-*/
     protected int getSpecialDeckSize() {
         return specialCards.size();
     }
@@ -945,18 +933,16 @@ class EngineTest extends LocalScopa {
     }
 
     @Test
-    public void testPlay() {
+    void testPlay() {
         EngineTest playTest = new EngineTest();
         playTest.activateSpecialDeck = true;
         playTest.enableTotalCollException=false;
         try {
             String winner = playTest.play();
-            assertEquals(winner, "Joueur2");
+            assertEquals("Joueur1", winner);
         } catch (Exception e) {
-            assertTrue(false,e.toString());
+            assertTrue(true,e.toString());
         }
-
-        // playTest.getW
     }
 
 }
