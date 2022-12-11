@@ -34,12 +34,11 @@ Le gagnant est celui qui a le plus de points.
 
 ### Détail des classes principales
 
-Un exemple de jeu supportant le réseau
 
-* LocalWarGame la version du jeu supportant le jeu en local
-* WarGameEngine le moteur du jeu
-* WarGameNetorkPlayer le joueur distant en cas de partie réseau
-* WarGameNetworkEngine la version du jeu supportant le réseau
+* LocalScopa la version du jeu supportant le jeu en local
+* ScopaEngine le moteur du jeu
+* ScopaNetworkPlayer le joueur distant en cas de partie réseau
+* ScopaNetworkEngine la version du jeu supportant le réseau
 
 
 # Protocole réseau

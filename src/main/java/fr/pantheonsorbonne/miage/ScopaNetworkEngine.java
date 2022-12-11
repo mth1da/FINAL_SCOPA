@@ -60,7 +60,7 @@ public class ScopaNetworkEngine extends ScopaEngine {
     }
 
     /**
-     * give this hand (as string) the the provided player
+     * give this hand (as string) to the provided player
      *
      * @param playerName name of the player to receive the cards
      * @param hand       the cards as Strings

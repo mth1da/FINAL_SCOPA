@@ -135,6 +135,13 @@ class EngineTest extends LocalScopa {
             
         }
         {
+            var test = new LocalScopa(Set.of("Joueur1"));
+            test.giveCardsToPlayer("Joueur1", "3C");
+            test.giveCardsToPlayer("Joueur1", "7D");
+            assertEquals("3C",test.getCardFromPlayer("Joueur1").toString());
+            
+        }
+        {
             var test = new LocalScopa(Set.of("Joueur2"));
             test.giveCardsToPlayer("Joueur2", "7D");
             assertEquals("7D",test.getCardFromPlayer("Joueur2").toString());
@@ -938,8 +945,8 @@ class EngineTest extends LocalScopa {
         playTest.activateSpecialDeck = true;
         playTest.enableTotalCollException=false;
         try {
-            String winner = playTest.play();
-            assertEquals("Joueur1", winner);
+            playTest.play();
+            assertEquals(true, enableTotalCollException);
         } catch (Exception e) {
             assertTrue(true,e.toString());
         }
