@@ -16,7 +16,8 @@ Les joueurs sont répartis dans l'ordre d'arrivée. Chaque joueur joue à tour d
 -	soit une paire est possible, c’est-à-dire que le joueur peut récupérer une carte de la table avec une de ses cartes de la même valeur. Le joueur conserve les cartes dans une liste ;
 -	soit une scopa est possible, c’est-à-dire qu’en faisait une paire, le joueur récupère la totalité des cartes sur la table. Le joueur conserve les cartes dans une liste et marque sa carte scopa ; 
 -	soit rien n’est pas possible, le joueur dépose donc la carte de son choix sur la table.
-A la fin de chaque tour, une carte est distribuée à chaque joueur pour qu’il en ait toujours 3.
+
+A la fin de chaque tour, on distribue 3 cartes à chaque joueur.
 
 Le jeu s'arrête lorsqu'il n'y a plus de cartes à distribuer.
 
