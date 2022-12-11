@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScopaNetworkPlayer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">l3-poo-war</a> &gt; <a href="index.source.html" class="el_package">fr.pantheonsorbonne.miage</a> &gt; <span class="el_source">ScopaNetworkPlayer.java</span></div><h1>ScopaNetworkPlayer.java</h1><pre class="source lang-java linenums">package fr.pantheonsorbonne.miage;
 
-
 import fr.pantheonsorbonne.miage.exception.NoSuchCommandException;
 import fr.pantheonsorbonne.miage.game.Card;
 import fr.pantheonsorbonne.miage.model.Game;
@@ -14,67 +13,64 @@ import java.util.stream.Collectors;
 /**
  * this is the player part of the network version of the scopa
  */
-<span class="nc" id="L17">public class ScopaNetworkPlayer {</span>
+<span class="nc" id="L16">public class ScopaNetworkPlayer {</span>
 
-<span class="nc" id="L19">    static final String playerId = &quot;Player-&quot; + new Random().nextInt();</span>
-<span class="nc" id="L20">    static final Deque&lt;Card&gt; hand = new LinkedList&lt;&gt;();</span>
-<span class="nc" id="L21">    static final PlayerFacade playerFacade = Facade.getFacade();</span>
+<span class="nc" id="L18">    static final String playerId = &quot;Player-&quot; + new Random().nextInt();</span>
+<span class="nc" id="L19">    static final Deque&lt;Card&gt; hand = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L20">    static final PlayerFacade playerFacade = Facade.getFacade();</span>
     static Game scopa;
 
     public static void main(String[] args) throws NoSuchCommandException {
 
-<span class="nc" id="L26">        playerFacade.waitReady();</span>
-<span class="nc" id="L27">        playerFacade.createNewPlayer(playerId);</span>
-<span class="nc" id="L28">        scopa = playerFacade.autoJoinGame(&quot;SCOPA&quot;);</span>
-<span class="nc" id="L29">        GameCommand command = playerFacade.receiveGameCommand(scopa);</span>
-<span class="nc bnc" id="L30" title="All 2 branches missed.">        while (!command.name().equals(&quot;gameOver&quot;)) {</span>
+<span class="nc" id="L25">        playerFacade.waitReady();</span>
+<span class="nc" id="L26">        playerFacade.createNewPlayer(playerId);</span>
+<span class="nc" id="L27">        scopa = playerFacade.autoJoinGame(&quot;SCOPA&quot;);</span>
+<span class="nc" id="L28">        GameCommand command = playerFacade.receiveGameCommand(scopa);</span>
+<span class="nc bnc" id="L29" title="All 2 branches missed.">        while (!command.name().equals(&quot;gameOver&quot;)) {</span>
 
             
-<span class="nc bnc" id="L33" title="All 4 branches missed.">            switch (command.name()) {</span>
+<span class="nc bnc" id="L32" title="All 4 branches missed.">            switch (command.name()) {</span>
                 case &quot;cardsForYou&quot;:
-<span class="nc" id="L35">                    handleCardsForYou(command);</span>
-<span class="nc" id="L36">                    break;</span>
+<span class="nc" id="L34">                    handleCardsForYou(command);</span>
+<span class="nc" id="L35">                    break;</span>
                 case &quot;playACard&quot;:
-<span class="nc" id="L38">                    System.out.println(&quot;I have &quot; + hand.stream().map(Card::toFancyString).collect(Collectors.joining(&quot; &quot;)));</span>
-<span class="nc" id="L39">                    handlePlayACard(command);</span>
-<span class="nc" id="L40">                    break;</span>
+<span class="nc" id="L37">                    System.out.println(&quot;I have &quot; + hand.stream().map(Card::toFancyString).collect(Collectors.joining(&quot; &quot;)));</span>
+<span class="nc" id="L38">                    handlePlayACard(command);</span>
+<span class="nc" id="L39">                    break;</span>
                 case &quot;gameOver&quot;:
-<span class="nc" id="L42">                    handleGameOverCommand(command);</span>
-<span class="nc" id="L43">                    break;</span>
+<span class="nc" id="L41">                    handleGameOverCommand(command);</span>
+<span class="nc" id="L42">                    break;</span>
                 default :
-<span class="nc" id="L45">                    throw new NoSuchCommandException(command.name());</span>
-
-                
-<span class="nc" id="L48">            }</span>
+<span class="nc" id="L44">                    throw new NoSuchCommandException(command.name());</span>
+<span class="nc" id="L45">            }</span>
         }
-<span class="nc" id="L50">    }</span>
+<span class="nc" id="L47">    }</span>
 
     private static void handleCardsForYou(GameCommand command) {
 
-<span class="nc bnc" id="L54" title="All 2 branches missed.">        for (Card card : Card.stringToCards(command.body())) {</span>
-<span class="nc" id="L55">            hand.offerLast(card);</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        for (Card card : Card.stringToCards(command.body())) {</span>
+<span class="nc" id="L52">            hand.offerLast(card);</span>
         }
 
-<span class="nc" id="L58">    }</span>
+<span class="nc" id="L55">    }</span>
 
     private static void handlePlayACard(GameCommand command) {
-<span class="nc bnc" id="L61" title="All 2 branches missed.">        if (command.params().get(&quot;playerId&quot;).equals(playerId)) {</span>
-<span class="nc bnc" id="L62" title="All 2 branches missed.">            if (!hand.isEmpty()) {</span>
-<span class="nc" id="L63">                playerFacade.sendGameCommandToAll(scopa, new GameCommand(&quot;card&quot;, hand.pollFirst().toString()));</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        if (command.params().get(&quot;playerId&quot;).equals(playerId)) {</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">            if (!hand.isEmpty()) {</span>
+<span class="nc" id="L60">                playerFacade.sendGameCommandToAll(scopa, new GameCommand(&quot;card&quot;, hand.pollFirst().toString()));</span>
             } else {
-<span class="nc" id="L65">                playerFacade.sendGameCommandToAll(scopa, new GameCommand(&quot;outOfCard&quot;, playerId));</span>
+<span class="nc" id="L62">                playerFacade.sendGameCommandToAll(scopa, new GameCommand(&quot;outOfCard&quot;, playerId));</span>
             }
         }
-<span class="nc" id="L68">    }</span>
+<span class="nc" id="L65">    }</span>
 
     private static void handleGameOverCommand(GameCommand command) {
-<span class="nc bnc" id="L71" title="All 2 branches missed.">        if (command.body().equals(&quot;win&quot;)) {</span>
-<span class="nc" id="L72">            System.out.println(&quot;I've won!&quot;);</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">        if (command.body().equals(&quot;win&quot;)) {</span>
+<span class="nc" id="L69">            System.out.println(&quot;I've won!&quot;);</span>
         } else {
-<span class="nc" id="L74">            System.out.println(&quot;I've lost :-(&quot;);</span>
+<span class="nc" id="L71">            System.out.println(&quot;I've lost :(&quot;);</span>
         }
-<span class="nc" id="L76">        System.exit(0);</span>
-<span class="nc" id="L77">    }</span>
+<span class="nc" id="L73">        System.exit(0);</span>
+<span class="nc" id="L74">    }</span>
 }
-
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

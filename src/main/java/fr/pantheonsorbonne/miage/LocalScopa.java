@@ -14,23 +14,6 @@ public class LocalScopa extends ScopaEngine {
     private final Set<String> initialPlayers;
     private final Map<String, Queue<Card>> playerCards = new HashMap<>();
 
-    protected Queue<Card> getPlayerCards(String playerName) throws NoSuchPlayerException{
-        Queue<Card> playerCard;
-        playerCard=playerCards.get(playerName);
-        if (playerCard==null)
-            throw new NoSuchPlayerException(playerName);
-        return playerCard;
-    }
-    
-    
-
-    public LocalScopa(Set<String> initialPlayers) {
-        this.initialPlayers = initialPlayers;
-        for (String player : initialPlayers) {
-            playerCards.put(player, new LinkedList<>());
-        }
-    }
-
 
     public static void main(String... args) {
         LocalScopa localScopa = new LocalScopa(Set.of("Joueur1", "Joueur2", "Joueur3", "Joueur4"));
@@ -41,8 +24,21 @@ public class LocalScopa extends ScopaEngine {
         catch (Exception e){
             System.out.println(e);
         }
-        
+    }
 
+    protected Queue<Card> getPlayerCards(String playerName) throws NoSuchPlayerException{
+        Queue<Card> playerCard;
+        playerCard=playerCards.get(playerName);
+        if (playerCard==null)
+            throw new NoSuchPlayerException(playerName);
+        return playerCard;
+    }
+
+    public LocalScopa(Set<String> initialPlayers) {
+        this.initialPlayers = initialPlayers;
+        for (String player : initialPlayers) {
+            playerCards.put(player, new LinkedList<>());
+        }
     }
 
     @Override
@@ -89,18 +85,5 @@ public class LocalScopa extends ScopaEngine {
     protected void declareWinner(String winner) {
         System.out.println(winner + " won! \n");
     }
-
-    /*
-    @Override
-    protected Card getCardOrGameOver(Collection<Card> leftOverCard, String cardProviderPlayer, String cardProviderPlayerOpponent) {
-
-        if (!this.playerCards.containsKey(cardProviderPlayer) || this.playerCards.get(cardProviderPlayer).isEmpty()) {
-            this.playerCards.get(cardProviderPlayerOpponent).addAll(leftOverCard);
-            this.playerCards.remove(cardProviderPlayer);
-            return null;
-        } else {
-            return this.playerCards.get(cardProviderPlayer).poll();
-        }
-    }*/
     
 }

@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.*;
-//import java.util.stream.Collectors;
 
 import fr.pantheonsorbonne.miage.enums.CardColor;
 import fr.pantheonsorbonne.miage.enums.CardValue;

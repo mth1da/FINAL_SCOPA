@@ -567,19 +567,22 @@ public abstract class ScopaEngine {
 
 			if (player.getKey().equals(havingSettebello(playerCollectedCards))) {
 				count++;
+				System.out.println(player.getKey() + " got 1 point for having collected the settebello.");
 			}
 
 			//setting the score of each player
 			playersScores.put(player.getKey(), count);
 
 			//adding to the score the scopa points if any
-			if (playerCollectedScopa.get(player.getKey()) != null) {
-				playersScores.put(player.getKey(), count + playerCollectedScopa.get(player.getKey()));
+			if (playerCollectedScopa.get(player.getKey()) != null && playerCollectedScopa.get(player.getKey()) != 0){
+				int scopaPoint = playerCollectedScopa.get(player.getKey());
+				playersScores.put(player.getKey(), count + scopaPoint);
+				System.out.println(player.getKey() + " got " + scopaPoint + " point for having made " + scopaPoint + " scopa.");
 			}
 		}
-		//bestCountPlayers.stream().forEach(p -> System.out.println(p + " got 1 point for having collected the most cards."));
-		//mostDenierCountPlayers.stream().forEach(p -> System.out.println(p + " got 1 point for having collected the most cards of diamond."));
-
+		bestCountPlayers.stream().forEach(p -> System.out.println(p + " got 1 point for having made the most pairs."));
+		mostDenierCountPlayers.stream().forEach(p -> System.out.println(p + " got 1 point for having collected the most cards of diamond."));
+		System.out.println("\n");
 
 		return playersScores;
 	}
@@ -668,18 +671,5 @@ public abstract class ScopaEngine {
 	 * @return
 	 */
 	protected abstract Set<String> getInitialPlayers();
-
-	/**
-	 * get a card from a player. If the player doesn't have a card, it will be
-	 * declared loser and all the left over cards will be given to his opponent
-	 *
-	 * @param leftOverCard               card left over from another round
-	 * @param cardProviderPlayer         the player that should give a card
-	 * @param cardProviderPlayerOpponent the Opponent of this player
-	 * @return a card of null if player cardProviderPlayer is gameover
-	 */
-	/*protected abstract Card getCardOrGameOver(Collection<Card> leftOverCard, String cardProviderPlayer,
-			String cardProviderPlayerOpponent);
-	*/
 
 }

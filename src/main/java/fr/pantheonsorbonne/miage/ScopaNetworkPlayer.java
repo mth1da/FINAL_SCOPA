@@ -1,6 +1,5 @@
 package fr.pantheonsorbonne.miage;
 
-
 import fr.pantheonsorbonne.miage.exception.NoSuchCommandException;
 import fr.pantheonsorbonne.miage.game.Card;
 import fr.pantheonsorbonne.miage.model.Game;
@@ -43,8 +42,6 @@ public class ScopaNetworkPlayer {
                     break;
                 default :
                     throw new NoSuchCommandException(command.name());
-
-                
             }
         }
     }
@@ -71,9 +68,8 @@ public class ScopaNetworkPlayer {
         if (command.body().equals("win")) {
             System.out.println("I've won!");
         } else {
-            System.out.println("I've lost :-(");
+            System.out.println("I've lost :(");
         }
         System.exit(0);
     }
 }
-

@@ -7,8 +7,8 @@ l3-poo-war,fr.pantheonsorbonne.miage.exception,NoSuchCommandException,5,0,0,0,2,
 l3-poo-war,fr.pantheonsorbonne.miage.exception,InvalidStateException,4,0,0,0,2,0,1,0,1,0
 l3-poo-war,fr.pantheonsorbonne.miage.exception,NoSuchPlayerException,0,5,0,0,0,2,0,1,0,1
 l3-poo-war,fr.pantheonsorbonne.miage,ScopaNetworkPlayer,141,0,14,0,33,0,14,0,6,0
-l3-poo-war,fr.pantheonsorbonne.miage,LocalScopa,18,137,0,10,6,31,1,13,1,8
-l3-poo-war,fr.pantheonsorbonne.miage,ScopaEngine,23,1093,3,119,8,230,5,88,2,30
-l3-poo-war,fr.pantheonsorbonne.miage,ScopaNetworkEngine,136,0,4,0,31,0,10,0,8,0
+l3-poo-war,fr.pantheonsorbonne.miage,LocalScopa,17,137,0,10,6,31,1,13,1,8
+l3-poo-war,fr.pantheonsorbonne.miage,ScopaEngine,23,1140,3,121,10,237,5,91,2,32
+l3-poo-war,fr.pantheonsorbonne.miage,ScopaNetworkEngine,135,0,4,0,31,0,10,0,8,0
 l3-poo-war,fr.pantheonsorbonne.miage.game,Card,3,87,1,3,1,17,1,10,0,9
 l3-poo-war,fr.pantheonsorbonne.miage.game,Deck,0,110,0,8,0,18,0,7,0,3

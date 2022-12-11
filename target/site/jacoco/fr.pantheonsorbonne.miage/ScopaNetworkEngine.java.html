@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScopaNetworkEngine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">l3-poo-war</a> &gt; <a href="index.source.html" class="el_package">fr.pantheonsorbonne.miage</a> &gt; <span class="el_source">ScopaNetworkEngine.java</span></div><h1>ScopaNetworkEngine.java</h1><pre class="source lang-java linenums">package fr.pantheonsorbonne.miage;
 
-
 import fr.pantheonsorbonne.miage.exception.InvalidStateException;
 import fr.pantheonsorbonne.miage.exception.NoMoreCardException;
 import fr.pantheonsorbonne.miage.exception.NoSuchPlayerException;
@@ -8,7 +7,6 @@ import fr.pantheonsorbonne.miage.exception.TotalCollectedCardException;
 import fr.pantheonsorbonne.miage.game.Card;
 import fr.pantheonsorbonne.miage.model.Game;
 import fr.pantheonsorbonne.miage.model.GameCommand;
-
 
 import java.util.*;
 
@@ -23,31 +21,31 @@ public class ScopaNetworkEngine extends ScopaEngine {
     private final Set&lt;String&gt; players;
     private final Game scopa;
 
-<span class="nc" id="L26">    public ScopaNetworkEngine(HostFacade hostFacade, Set&lt;String&gt; players, fr.pantheonsorbonne.miage.model.Game scopa) {</span>
-<span class="nc" id="L27">        this.hostFacade = hostFacade;</span>
-<span class="nc" id="L28">        this.players = players;</span>
-<span class="nc" id="L29">        this.scopa = scopa;</span>
-<span class="nc" id="L30">    }</span>
+<span class="nc" id="L24">    public ScopaNetworkEngine(HostFacade hostFacade, Set&lt;String&gt; players, fr.pantheonsorbonne.miage.model.Game scopa) {</span>
+<span class="nc" id="L25">        this.hostFacade = hostFacade;</span>
+<span class="nc" id="L26">        this.players = players;</span>
+<span class="nc" id="L27">        this.scopa = scopa;</span>
+<span class="nc" id="L28">    }</span>
 
     public static void main(String[] args) throws TotalCollectedCardException, NoSuchPlayerException, InvalidStateException {
         //create the host facade
-<span class="nc" id="L34">        HostFacade hostFacade = Facade.getFacade();</span>
-<span class="nc" id="L35">        hostFacade.waitReady();</span>
+<span class="nc" id="L32">        HostFacade hostFacade = Facade.getFacade();</span>
+<span class="nc" id="L33">        hostFacade.waitReady();</span>
 
         //set the name of the player
-<span class="nc" id="L38">        hostFacade.createNewPlayer(&quot;Host&quot;);</span>
+<span class="nc" id="L36">        hostFacade.createNewPlayer(&quot;Host&quot;);</span>
 
         //create a new game of scopa
-<span class="nc" id="L41">        fr.pantheonsorbonne.miage.model.Game scopa = hostFacade.createNewGame(&quot;SCOPA&quot;);</span>
+<span class="nc" id="L39">        fr.pantheonsorbonne.miage.model.Game scopa = hostFacade.createNewGame(&quot;SCOPA&quot;);</span>
 
         //wait for enough players to join
-<span class="nc" id="L44">        hostFacade.waitForExtraPlayerCount(PLAYER_COUNT);</span>
+<span class="nc" id="L42">        hostFacade.waitForExtraPlayerCount(PLAYER_COUNT);</span>
 
-<span class="nc" id="L46">        ScopaEngine host = new ScopaNetworkEngine(hostFacade, scopa.getPlayers(), scopa);</span>
-<span class="nc" id="L47">        host.play();</span>
+<span class="nc" id="L44">        ScopaEngine host = new ScopaNetworkEngine(hostFacade, scopa.getPlayers(), scopa);</span>
+<span class="nc" id="L45">        host.play();</span>
 
 
-<span class="nc" id="L50">    }</span>
+<span class="nc" id="L48">    }</span>
 
     /**
      * get the set of players initially in the game
@@ -56,25 +54,25 @@ public class ScopaNetworkEngine extends ScopaEngine {
      */
     @Override
     protected Set&lt;String&gt; getInitialPlayers() {
-<span class="nc" id="L59">        return this.scopa.getPlayers();</span>
+<span class="nc" id="L57">        return this.scopa.getPlayers();</span>
     }
 
     /**
-     * give this hand (as string) the the provided player
+     * give this hand (as string) to the provided player
      *
      * @param playerName name of the player to receive the cards
      * @param hand       the cards as Strings
      */
     @Override
     protected void giveCardsToPlayer(String playerName, String hand) {
-<span class="nc" id="L70">        hostFacade.sendGameCommandToPlayer(scopa, playerName, new GameCommand(CARDSFORYOU, hand));</span>
-<span class="nc" id="L71">    }</span>
+<span class="nc" id="L68">        hostFacade.sendGameCommandToPlayer(scopa, playerName, new GameCommand(CARDSFORYOU, hand));</span>
+<span class="nc" id="L69">    }</span>
 
 
     @Override
     protected void declareWinner(String winner) {
-<span class="nc" id="L76">        hostFacade.sendGameCommandToPlayer(scopa, winner, new GameCommand(&quot;gameOver&quot;, &quot;win&quot;));</span>
-<span class="nc" id="L77">    }</span>
+<span class="nc" id="L74">        hostFacade.sendGameCommandToPlayer(scopa, winner, new GameCommand(&quot;gameOver&quot;, &quot;win&quot;));</span>
+<span class="nc" id="L75">    }</span>
 
     /**
      * Try to get a card from the player. If it fails, give roundStack to the other player
@@ -113,12 +111,12 @@ public class ScopaNetworkEngine extends ScopaEngine {
      */
     @Override
     protected void giveCardsToPlayer(Collection&lt;Card&gt; roundStack, String winner) {
-<span class="nc" id="L116">        List&lt;Card&gt; cards = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L117">        cards.addAll(roundStack);</span>
+<span class="nc" id="L114">        List&lt;Card&gt; cards = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L115">        cards.addAll(roundStack);</span>
         //shuffle the round deck so we are not stuck
-<span class="nc" id="L119">        Collections.shuffle(cards);</span>
-<span class="nc" id="L120">        hostFacade.sendGameCommandToPlayer(scopa, winner, new GameCommand(CARDSFORYOU, Card.cardsToString(cards.toArray(new Card[cards.size()]))));</span>
-<span class="nc" id="L121">    }</span>
+<span class="nc" id="L117">        Collections.shuffle(cards);</span>
+<span class="nc" id="L118">        hostFacade.sendGameCommandToPlayer(scopa, winner, new GameCommand(CARDSFORYOU, Card.cardsToString(cards.toArray(new Card[cards.size()]))));</span>
+<span class="nc" id="L119">    }</span>
 
     /**
      * we get a card from a player, if possible.
@@ -132,26 +130,23 @@ public class ScopaNetworkEngine extends ScopaEngine {
      */
     @Override
     protected Card getCardFromPlayer(String player) throws NoMoreCardException, InvalidStateException {
-<span class="nc" id="L135">        hostFacade.sendGameCommandToPlayer(scopa, player, new GameCommand(&quot;playACard&quot;));</span>
-<span class="nc" id="L136">        GameCommand expectedCard = hostFacade.receiveGameCommand(scopa);</span>
-<span class="nc bnc" id="L137" title="All 2 branches missed.">        if (expectedCard.name().equals(&quot;card&quot;)) {</span>
-<span class="nc" id="L138">            return Card.valueOf(expectedCard.body());</span>
+<span class="nc" id="L133">        hostFacade.sendGameCommandToPlayer(scopa, player, new GameCommand(&quot;playACard&quot;));</span>
+<span class="nc" id="L134">        GameCommand expectedCard = hostFacade.receiveGameCommand(scopa);</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">        if (expectedCard.name().equals(&quot;card&quot;)) {</span>
+<span class="nc" id="L136">            return Card.valueOf(expectedCard.body());</span>
         }
-<span class="nc bnc" id="L140" title="All 2 branches missed.">        if (expectedCard.name().equals(&quot;outOfCard&quot;)) {</span>
-<span class="nc" id="L141">            throw new NoMoreCardException();</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">        if (expectedCard.name().equals(&quot;outOfCard&quot;)) {</span>
+<span class="nc" id="L139">            throw new NoMoreCardException();</span>
         }
         //should not happen!
-<span class="nc" id="L144">        throw new InvalidStateException();</span>
+<span class="nc" id="L142">        throw new InvalidStateException();</span>
 
     }
 
     @Override
     protected Queue&lt;Card&gt; getPlayerCards(String playerName) {
-<span class="nc" id="L150">        return new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L148">        return new LinkedList&lt;&gt;();</span>
     }
 
-	
-
 }
-
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,6 +1,5 @@
 package fr.pantheonsorbonne.miage;
 
-
 import fr.pantheonsorbonne.miage.exception.InvalidStateException;
 import fr.pantheonsorbonne.miage.exception.NoMoreCardException;
 import fr.pantheonsorbonne.miage.exception.NoSuchPlayerException;
@@ -8,7 +7,6 @@ import fr.pantheonsorbonne.miage.exception.TotalCollectedCardException;
 import fr.pantheonsorbonne.miage.game.Card;
 import fr.pantheonsorbonne.miage.model.Game;
 import fr.pantheonsorbonne.miage.model.GameCommand;
-
 
 import java.util.*;
 
@@ -20,12 +18,12 @@ public class ScopaNetworkEngine extends ScopaEngine {
     private static final String CARDSFORYOU = "cardsForYou";
 
     private final HostFacade hostFacade;
-    private final Set<String> players;
+    //private final Set<String> players;
     private final Game scopa;
 
-    public ScopaNetworkEngine(HostFacade hostFacade, Set<String> players, fr.pantheonsorbonne.miage.model.Game scopa) {
+    public ScopaNetworkEngine(HostFacade hostFacade, fr.pantheonsorbonne.miage.model.Game scopa) {
         this.hostFacade = hostFacade;
-        this.players = players;
+        //this.players = players;
         this.scopa = scopa;
     }
 
@@ -43,7 +41,7 @@ public class ScopaNetworkEngine extends ScopaEngine {
         //wait for enough players to join
         hostFacade.waitForExtraPlayerCount(PLAYER_COUNT);
 
-        ScopaEngine host = new ScopaNetworkEngine(hostFacade, scopa.getPlayers(), scopa);
+        ScopaEngine host = new ScopaNetworkEngine(hostFacade, scopa);
         host.play();
 
 
@@ -76,34 +74,6 @@ public class ScopaNetworkEngine extends ScopaEngine {
         hostFacade.sendGameCommandToPlayer(scopa, winner, new GameCommand("gameOver", "win"));
     }
 
-    /**
-     * Try to get a card from the player. If it fails, give roundStack to the other player
-     *
-     * @param leftOverCard               current cards at stake
-     * @param cardProviderPlayer         the player (to provide a card)
-     * @param cardProviderPlayerOpponent its opponent (to receive the stack if contestantA does not have cards anymore)
-     * @return the card from contestant A or null if contetant A is gameover
-     */
-    /*
-    @Override
-    protected Card getCardOrGameOver(Collection<Card> leftOverCard, String cardProviderPlayer, String cardProviderPlayerOpponent) {
-
-        try {
-            return getCardFromPlayer(cardProviderPlayer);
-        } catch (NoMoreCardException nmc) {
-            //contestant A is out of cards
-            //we send him a gameover
-            hostFacade.sendGameCommandToPlayer(scopa, cardProviderPlayer, new GameCommand("gameOver"));
-            //remove him from the queue so he won't play again
-            players.remove(cardProviderPlayer);
-            //give back all the cards for this round to the second players
-            hostFacade.sendGameCommandToPlayer(scopa, cardProviderPlayerOpponent, new GameCommand(CARDSFORYOU, Card.cardsToString(leftOverCard.toArray(new Card[leftOverCard.size()]))));
-            return null;
-        } catch (InvalidStateException e) {
-            return null;
-        }
-        
-    }*/
 
     /**
      * give this stack of card to the winner player
@@ -150,7 +120,4 @@ public class ScopaNetworkEngine extends ScopaEngine {
         return new LinkedList<>();
     }
 
-	
-
 }
-
