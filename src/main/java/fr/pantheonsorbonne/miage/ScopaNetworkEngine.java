@@ -84,6 +84,7 @@ public class ScopaNetworkEngine extends ScopaEngine {
      * @param cardProviderPlayerOpponent its opponent (to receive the stack if contestantA does not have cards anymore)
      * @return the card from contestant A or null if contetant A is gameover
      */
+    /*
     @Override
     protected Card getCardOrGameOver(Collection<Card> leftOverCard, String cardProviderPlayer, String cardProviderPlayerOpponent) {
 
@@ -102,7 +103,7 @@ public class ScopaNetworkEngine extends ScopaEngine {
             return null;
         }
         
-    }
+    }*/
 
     /**
      * give this stack of card to the winner player

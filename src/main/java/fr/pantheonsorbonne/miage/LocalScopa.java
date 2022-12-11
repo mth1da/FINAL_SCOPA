@@ -66,6 +66,7 @@ public class LocalScopa extends ScopaEngine {
         System.out.println(winner + " has won!");
     }
 
+    /*
     @Override
     protected Card getCardOrGameOver(Collection<Card> leftOverCard, String cardProviderPlayer, String cardProviderPlayerOpponent) {
 
@@ -76,7 +77,7 @@ public class LocalScopa extends ScopaEngine {
         } else {
             return this.playerCards.get(cardProviderPlayer).poll();
         }
-    }
+    }*/
 
     @Override
     protected void giveCardsToPlayer(Collection<Card> roundStack, String winner) {

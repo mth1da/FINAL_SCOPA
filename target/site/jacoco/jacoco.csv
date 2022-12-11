@@ -1,14 +1,14 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 l3-poo-war,fr.pantheonsorbonne.miage.enums,CardColor,5,74,1,3,1,13,1,6,0,5
 l3-poo-war,fr.pantheonsorbonne.miage.enums,CardValue,8,120,1,3,2,19,2,5,1,4
-l3-poo-war,fr.pantheonsorbonne.miage.exception,NoMoreCardException,4,3,0,0,2,2,1,1,1,1
+l3-poo-war,fr.pantheonsorbonne.miage.exception,NoMoreCardException,0,4,0,0,0,2,0,1,0,1
 l3-poo-war,fr.pantheonsorbonne.miage.exception,TotalCollectedCardException,5,0,0,0,2,0,1,0,1,0
 l3-poo-war,fr.pantheonsorbonne.miage.exception,NoSuchCommandException,5,0,0,0,2,0,1,0,1,0
 l3-poo-war,fr.pantheonsorbonne.miage.exception,InvalidStateException,4,0,0,0,2,0,1,0,1,0
 l3-poo-war,fr.pantheonsorbonne.miage.exception,NoSuchPlayerException,0,5,0,0,0,2,0,1,0,1
 l3-poo-war,fr.pantheonsorbonne.miage,ScopaNetworkPlayer,141,0,14,0,33,0,14,0,6,0
-l3-poo-war,fr.pantheonsorbonne.miage,LocalScopa,53,137,4,10,11,31,4,13,2,8
+l3-poo-war,fr.pantheonsorbonne.miage,LocalScopa,18,137,0,10,6,31,1,13,1,8
 l3-poo-war,fr.pantheonsorbonne.miage,ScopaEngine,17,1099,5,119,5,232,6,88,2,30
-l3-poo-war,fr.pantheonsorbonne.miage,ScopaNetworkEngine,178,0,4,0,39,0,11,0,9,0
+l3-poo-war,fr.pantheonsorbonne.miage,ScopaNetworkEngine,136,0,4,0,31,0,10,0,8,0
 l3-poo-war,fr.pantheonsorbonne.miage.game,Card,3,87,1,3,1,17,1,10,0,9
 l3-poo-war,fr.pantheonsorbonne.miage.game,Deck,0,110,0,8,0,18,0,7,0,3

@@ -66,38 +66,39 @@ public class LocalScopa extends ScopaEngine {
 <span class="fc" id="L66">        System.out.println(winner + &quot; has won!&quot;);</span>
 <span class="fc" id="L67">    }</span>
 
+    /*
     @Override
     protected Card getCardOrGameOver(Collection&lt;Card&gt; leftOverCard, String cardProviderPlayer, String cardProviderPlayerOpponent) {
 
-<span class="nc bnc" id="L72" title="All 4 branches missed.">        if (!this.playerCards.containsKey(cardProviderPlayer) || this.playerCards.get(cardProviderPlayer).isEmpty()) {</span>
-<span class="nc" id="L73">            this.playerCards.get(cardProviderPlayerOpponent).addAll(leftOverCard);</span>
-<span class="nc" id="L74">            this.playerCards.remove(cardProviderPlayer);</span>
-<span class="nc" id="L75">            return null;</span>
+        if (!this.playerCards.containsKey(cardProviderPlayer) || this.playerCards.get(cardProviderPlayer).isEmpty()) {
+            this.playerCards.get(cardProviderPlayerOpponent).addAll(leftOverCard);
+            this.playerCards.remove(cardProviderPlayer);
+            return null;
         } else {
-<span class="nc" id="L77">            return this.playerCards.get(cardProviderPlayer).poll();</span>
+            return this.playerCards.get(cardProviderPlayer).poll();
         }
-    }
+    }*/
 
     @Override
     protected void giveCardsToPlayer(Collection&lt;Card&gt; roundStack, String winner) {
-<span class="fc" id="L83">        List&lt;Card&gt; cards = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L84">        cards.addAll(roundStack);</span>
-<span class="fc" id="L85">        Collections.shuffle(cards);</span>
-<span class="fc" id="L86">        this.playerCards.get(winner).addAll(cards);</span>
-<span class="fc" id="L87">    }</span>
+<span class="fc" id="L84">        List&lt;Card&gt; cards = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L85">        cards.addAll(roundStack);</span>
+<span class="fc" id="L86">        Collections.shuffle(cards);</span>
+<span class="fc" id="L87">        this.playerCards.get(winner).addAll(cards);</span>
+<span class="fc" id="L88">    }</span>
 
     @Override
     protected Card getCardFromPlayer(String player) throws NoMoreCardException {
-<span class="fc bfc" id="L91" title="All 2 branches covered.">        if (this.playerCards.get(player).isEmpty()) {</span>
-<span class="fc" id="L92">            throw new NoMoreCardException();</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        if (this.playerCards.get(player).isEmpty()) {</span>
+<span class="fc" id="L93">            throw new NoMoreCardException();</span>
         } else {
-<span class="fc" id="L94">        	Card card= this.playerCards.get(player).poll();</span>
-<span class="fc bfc" id="L95" title="All 4 branches covered.">        	if (card.toString().equals(&quot;7D&quot;) &amp;&amp; !this.playerCards.get(player).isEmpty()) {</span>
-<span class="fc" id="L96">        			Card secondCard = this.playerCards.get(player).poll();</span>
-<span class="fc" id="L97">        			this.playerCards.get(player).offer(card);</span>
-<span class="fc" id="L98">        			card=secondCard;</span>
+<span class="fc" id="L95">        	Card card= this.playerCards.get(player).poll();</span>
+<span class="fc bfc" id="L96" title="All 4 branches covered.">        	if (card.toString().equals(&quot;7D&quot;) &amp;&amp; !this.playerCards.get(player).isEmpty()) {</span>
+<span class="fc" id="L97">        			Card secondCard = this.playerCards.get(player).poll();</span>
+<span class="fc" id="L98">        			this.playerCards.get(player).offer(card);</span>
+<span class="fc" id="L99">        			card=secondCard;</span>
         	}        	
-<span class="fc" id="L100">            return card;</span>
+<span class="fc" id="L101">            return card;</span>
         }
     }
 

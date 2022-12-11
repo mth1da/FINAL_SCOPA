@@ -587,9 +587,9 @@ public abstract class ScopaEngine {
 	 * @param cardProviderPlayerOpponent the Opponent of this player
 	 * @return a card of null if player cardProviderPlayer is gameover
 	 */
-	protected abstract Card getCardOrGameOver(Collection<Card> leftOverCard, String cardProviderPlayer,
+	/*protected abstract Card getCardOrGameOver(Collection<Card> leftOverCard, String cardProviderPlayer,
 			String cardProviderPlayerOpponent);
-
+	*/
 	
 	/**
 	 * give some card to a player

@@ -46,5 +46,5 @@ Un exemple de jeu supportant le réseau
 
 > Le protocole réseau définit les séquences des commandes échangées entre les différentes parties prenantes. Il doit contenir, pour chaque commande, l'expéditeur, le destinataire, le nom de la commande et le contenu du corps de la commande.
 
-![protocole](doc/protocle.png)
+![protocole](doc/protocole.pdf)
 
