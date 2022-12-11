@@ -123,7 +123,6 @@ public abstract class ScopaEngine {
 	}
 
 	
-	
 
 	/**
 	 * give to the players their initial hand of cards
